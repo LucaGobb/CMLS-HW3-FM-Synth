@@ -9,20 +9,34 @@ FreqScope.new;
 
 (
 SynthDef(\fm, {
+	// information of input midi
 	arg midi_num = 60, midi_val = 1.0, gate = 1,
-	mod_ratio = 10.0,
-	//--------------------------------------
-	attack_mod   = 0.1,
-	decay_mod    = 0.4,
-	sustain_mod  = 0.15,
-	release_mod  = 0.2,
-	//--------------------------------------
+
+	// main parameters of modulator
+	harmonic_mod = 2,    // order of harmonic sequence
+	richness_mod = 5.0,  // richness of harmonic
+	subOsc_amp   = 0.3,  // the level of sub oscillator
+
+	// envelope of modulator
+	attack_mod   = 0.01,
+	decay_mod    = 0.1,
+	sustain_mod  = 0.2,
+	release_mod  = 0.4,
+
+	// envelope of note
 	attack_note  = 0.005,
 	decay_note   = 0.15,
 	sustain_note = 0.4,
-	release_note = 0.7;
+	release_note = 0.7,
 
-	var carrier_freq = midi_num.midicps;
+	// lfo to modulate the fundamental frequency and modulator
+	freq_lfo = 0.4,
+	depth_lfo = 3.0,
+
+	// bus imformation
+	freq_cutoff = 5000.0,
+	output_volume = 1.0,
+	pan = 0.0;
 
 	var env_mod = EnvGen.kr(Env.adsr(
 		attackTime: attack_mod,
@@ -39,27 +53,37 @@ SynthDef(\fm, {
 	gate: gate,
 	doneAction: 2);
 
-	var mod = SinOsc.ar(
-		freq: carrier_freq * 2.0, // 2.0 for creating even-order harmonic
-		mul:  carrier_freq * mod_ratio * env_mod); // richness of harmonic
+	var control_lfo = SinOsc.ar(
+		freq: freq_lfo,
+		mul: depth_lfo);
 
-	var signal = SinOsc.ar(
-		freq: carrier_freq + mod,
+	var fundamental_freq = midi_num.midicps + control_lfo;
+
+	var control_mod = richness_mod * SinOsc.ar(
+		freq: fundamental_freq * harmonic_mod + control_lfo,
+		mul:  fundamental_freq * env_mod + control_lfo.fold(1)); // add a little randomness
+
+	var signal_modulated = SinOsc.ar(
+		freq: fundamental_freq + control_mod,
 		mul: env_note);
 
-	signal = Pan2.ar(
-		in: signal,
-		pos: 0.0,
-		level: midi_val);
+	var signal_subOsc = SinOsc.ar(
+		freq: fundamental_freq / 2.0,
+		mul: subOsc_amp * env_note);
+
+	var signal_master = Pan2.ar(
+		in: midi_val * (signal_modulated + signal_subOsc),
+		pos: pan,
+		level: output_volume);
 
     Out.ar(
 		bus: 0,
-		channelsArray: signal);
+		channelsArray: LPF.ar(signal_master, freq_cutoff));
 
 }).add;
 )
 
-x = Synth(\fm, [midi_num: 55, midi_val: 1.0, mod_ratio: 15]);
+x = Synth(\fm, [midi_num: 69, mod_ratio: 0]);
 x.set(\gate, 0);
 x.release;
 
@@ -81,7 +105,10 @@ keys = Array.newClear(128);
 		keys.put(num, nil);
 	});
 
-	node = Synth.tail(nil, \fm, [midi_num: num, midi_val: val / (127.0)]);
+	node = Synth.tail(nil, \fm, [
+		midi_num: num,
+		midi_val: val / (127.0)]);
+
 	keys.put(num, node);
 	[chan,num,val].postln;
 };
@@ -104,11 +131,3 @@ q = {a.free; b.free;};
 )
 
 q.value;
-
-
-
-
-
-
-
-
