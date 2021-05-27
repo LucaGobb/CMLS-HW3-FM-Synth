@@ -1,4 +1,3 @@
-
 // OSC init
 public void oscInit() {
   osc = new OscP5(this, 12000);
@@ -33,7 +32,7 @@ void oscEvent(OscMessage theOscMessage) {
         noteOff(theOscMessage.get(0).intValue());
         break;
       case("/harmonicity"):
-        harmRichness.setCursorX(theOscMessage.get(0).intValue()); //todo float value
+        harmRichness.setCursorX(theOscMessage.get(0).intValue());
         break;
       case("/richness"):
         harmRichness.setCursorY(theOscMessage.get(0).intValue());
