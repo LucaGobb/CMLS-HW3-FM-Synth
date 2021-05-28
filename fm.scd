@@ -238,14 +238,16 @@ OSCdef.freeAll
 ~globalParametersVariables[0].set(2)
 ~globalParametersVariables[0].asRef.set(2)
 ~globalParametersVariables;
-/*~globalParametersVariables= [ // todo: those variables gets overwritten with the actual values
+(
+~globalParametersVariables= [ // todo: those variables gets overwritten with the actual values
 	~attack_note,  ~decay_note, ~sustain_note, ~release_note,
 	~attack_mod,   ~decay_mod,  ~sustain_mod,  ~release_mod,
 	~freq_lfo,     ~depth_lfo,
     ~subOsc_amp,   ~freq_cutoff,
-	~modlevel1, ~fine1, ~coarse1,
-	~modLevel2, ~fine2, ~coarse2,
-];*/
+	~modLevel1, ~fine1, ~coarse1,
+	~modLevel2, ~fine2, ~coarse2
+];
+)
 // ~globalParametersVariables= [ // todo: those variables gets overwritten with the actual values
 // 	0.5,  0.5, 0.5, 0.5,
 // 	0.5,   0.5,  0.5,  0.5,
@@ -260,11 +262,11 @@ OSCdef.freeAll
 OSCdef.freeAll;
 //names of the Synth parameters
 ~parametersName = [ //parameters starting with r are symbol to avoid cofusion with \r = "a capo"
-	'\attack_note",  '\decay_note', '\sustain_note', '\release_note',
-	'\attack_mod",   '\decay_mod',  '\sustain_mod',  '\release_mod',
-	'\freq_lfo',     '\depth_lfo",
-	'\subOsc_amp",   '\freq_cutoff',
-	'\modLevel1", '\fine1', "\coarse1",
+	'\attack_note',  '\decay_note', '\sustain_note', '\release_note',
+	'\attack_mod',   '\decay_mod',  '\sustain_mod',  '\release_mod',
+	'\freq_lfo',     '\depth_lfo',
+	'\subOsc_amp',   '\freq_cutoff',
+	'\modLevel1', '\fine1', '\coarse1',
 	'\modLevel2', '\fine2', '\coarse2',
 	'\volume'
 ];
@@ -285,7 +287,7 @@ OSCdef.freeAll;
 		9,{~depth_lfo = val},
 		10,{~subOsc_amp = val},
 		11,{~freq_cutoff = val},
-		12,{~modlevel1 = val},
+		12,{~modLevel1 = val},
 		13,{~fine1 = val},
 		14,{~coarse1 = val},
 		15,{~modLevel2 = val},
@@ -355,8 +357,8 @@ MIDIdef.noteOn(\noteOnTest, {
 		\midi_num, noteNum,
 		\gate, 1,
 			// \outputVolume, 1,
-		\outputVolume, ~volume * vel/(127.0),
-		\subOsc_amp, ~subOsc_amp,
+			\outputVolume, ~volume.value() * vel/(127.0),
+			\subOsc_amp, ~subOsc_amp.value(),
 		\freq_cutoff, ~freq_cutoff,
 
 		\freq_lfo, ~freq_lfo,
@@ -378,8 +380,8 @@ MIDIdef.noteOn(\noteOnTest, {
 		\coarse2, ~coarse2,
 		\fine1, ~fine1,
 		\fine2, ~fine2,
-		\modLevel1, ~modlevel1,
-		\modLevel2, ~modlevel2
+		\modLevel1, ~modLevel1,
+		\modLevel2, ~modLevel2
 		]
 		// [
 		// 	\midi_num, noteNum,
