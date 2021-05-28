@@ -598,72 +598,43 @@ harmRichness2
 }
 
 void controlEvent(ControlEvent theEvent) {
-  OscMessage myMessage = new OscMessage("/fromProcessing"); //Rate & Depth
-  myMessage.add(subOscLevel);
-  myMessage.add(cutoff);
-  myMessage.add(harmonicity_richness1);
-  myMessage.add(lfoRate);
-  myMessage.add(lfoDepth);
-  myMessage.add(noteAttack);
-  myMessage.add(noteDecay);
-  myMessage.add(noteRelease);
-  myMessage.add(noteSustain);
-  myMessage.add(modAttack);
-  myMessage.add(modDecay);
-  myMessage.add(modRelease);
-  myMessage.add(modSustain);
+    println(theEvent);
+    println(theEvent.getName());
+    if(theEvent.getName() != "harmonicity_richness"){ // todo: make the condition "if value is a single float"
+        sendOSCMessaggeKnob("/fromProcessing/" + theEvent.getName(), theEvent.value());
+    }else{
+        sendOSCMessaggeKnob("/fromProcessing/harmonicity", theEvent.getArrayValue(1));
+        sendOSCMessaggeKnob("/fromProcessing/richness", theEvent.getArrayValue(0));
+    };
+
+
+  //OscMessage myMessage = new OscMessage("/fromProcessing"); //Rate & Depth
+  //myMessage.add(subOscLevel);
+  //myMessage.add(cutoff);
+  //myMessage.add(harmonicity_richness1);
+  //myMessage.add(lfoRate);
+  //myMessage.add(lfoDepth);
+  //myMessage.add(noteAttack);
+  //myMessage.add(noteDecay);
+  //myMessage.add(noteRelease);
+  //myMessage.add(noteSustain);
+  //myMessage.add(modAttack);
+  //myMessage.add(modDecay);
+  //myMessage.add(modRelease);
+  //myMessage.add(modSustain);
+
+
+  //myMessage.add(harmonicity_richness2);
+  //myMessage.add(volume);
+  //myMessage.add(carrierModWaveform);
+  //myMessage.add(firstModWaveform);
+  //myMessage.add(secondModWaveform);
+  //myMessage.add(inharmonicity1);
+  //myMessage.add(inharmonicity2);
   
 
-  myMessage.add(harmonicity_richness2);
-  myMessage.add(volume);
-  myMessage.add(carrierModWaveform);  
-  myMessage.add(firstModWaveform);
-  myMessage.add(secondModWaveform);
-  myMessage.add(inharmonicity1);
-  myMessage.add(inharmonicity2);
-  
-  
-   
-  
-  osc.send(myMessage, supercollider); 
-  myMessage.print();
+  //osc.send(myMessage, supercollider);
+  //myMessage.print();
 
-  
-
-  
-  
 }
 
-
-
-
-  
-                
-
-  
-
-     
-
-
-
-  
-
-    
-
-
-
-
-
-
-  
-
-
-
-
-
-
-
- 
-
-
-    
