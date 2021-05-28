@@ -237,7 +237,7 @@ OSCdef.freeAll
 ~attack_note = 3;
 ~globalParametersVariables[0].set(2)
 ~globalParametersVariables[0].asRef.set(2)
-~globalParametersVariables
+~globalParametersVariables;
 /*~globalParametersVariables= [ // todo: those variables gets overwritten with the actual values
 	~attack_note,  ~decay_note, ~sustain_note, ~release_note,
 	~attack_mod,   ~decay_mod,  ~sustain_mod,  ~release_mod,
