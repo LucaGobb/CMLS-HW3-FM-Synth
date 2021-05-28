@@ -9,11 +9,6 @@ FreqScope.new;
 
 
 
-MIDIClient.init;
-MIDIIn.connectAll;
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////                   SYNTH                                      /////////////////////////
@@ -124,18 +119,10 @@ SynthDef(\fm, {
 }).add;
 )
 
+// test
 x = Synth(\fm, [\midi_num , 60, \richness_mod ,10 , \harmonic_mod, 5, \richness_mod2 ,5 , \harmonic_mod2, 2.5]);
 x.set(\gate, 0);
 x.free;
-
-
-
-
-
-
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////                   OSC                                       /////////////////////////
@@ -149,7 +136,6 @@ NetAddr("127.0.0.1", 57120);
 // ~processingOut.sendMsg("/harmonicity", 3);
 // ~processingOut.sendMsg("/richness", 5.0);
 
-(
 (
 OSCdef('OSCreceiver',
 	{
@@ -224,13 +210,97 @@ OSCdef('OSCreceiver',
 
 	},
 	"/fromProcessing");
-);
+)
+
+(
+var attackOSCReceive = {
+	|msg|
+	~notes.do({arg item, num;
+		if(item != nil, {
+			~notes[num].set(\attack_note, msg[1]);
+		});
+	});
+	msg.postln();
+};
+
+
+OSCdef('AmplitudeOSCReceiver', attackOSCReceive, "/fromProcessing/noteAttack").postln();
+)
+OSCdef.freeAll
+//todo remove: test
+"\\release_note".postln()
+~attack_note.value(5);
+~attack_note_(5);
+~attack_note.value()
+~attack_note = 6;
+
+(
+OSCdef.freeAll;
+~parametersName = [ //parameters starting with r are symbol to avoid cofusion with \r = "a capo"
+	"\attack_note",  "\decay_note", "\sustain_note", '\release_note',
+	"\attack_mod",   "\decay_mod",  "\sustain_mod",  '\release_mod',
+	'\freq_lfo',     "\depth_lfo",
+	"\subOsc_amp",   '\freq_cutoff',
+	'\richness_mod', "\harmonic_mod"
+];
+~globalParametersVariables= [ // todo: those variables gets overwritten with the actual values
+	~attack_note,  ~decay_note, ~sustain_note, ~release_note,
+	~attack_mod,   ~decay_mod,  ~sustain_mod,  ~release_mod,
+	~freq_lfo,     ~depth_lfo,
+    ~subOsc_amp,   ~freq_cutoff,
+	~richness_mod, ~harmonic_mod
+];
+~globalParametersVariables= [ // todo: those variables gets overwritten with the actual values
+	0.5,  0.5, 0.5, 0.5,
+	0.5,   0.5,  0.5,  0.5,
+	10,     10,
+    1,   15000,
+	1, 1
+];
+
+["noteAttack","noteDecay","noteSustain","noteRelease",
+	"modAttack","modDecay","modSustain","modRelease",
+	"lfoRate","lfoDepth",
+	"subOscLevel","cutoff",
+	"richness","harmonicity"
+].do({
+	arg param, num;
+	OSCdef(param ++ 'OSCReceiver',{
+		|msg|
+		~notes.do({arg item, number; // update current playing notes
+			if(item != nil, {
+				~notes[number].set(~parametersName[num], msg[1]);
+			});
+		});
+		~parametersName[num].post();
+		msg.postln();
+		// update global variables
+		// ~globalParametersVariables.at(num).value(msg[1]);
+		~globalParametersVariables[num] = msg[1];
+		~globalParametersVariables.postln();
+	}, "/fromProcessing/" ++ param);
+	// ~parametersName[num].postln();
+});
+)
+
+// todo: testing: remove
+~notes.do({arg item, number;
+	if(item != nil, {
+		~notes[number].set(~parametersName[12], 5);
+	});
+});
+~globalParametersVariables[11]
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////                   MIDI                                       /////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+(
+MIDIClient.init;
+MIDIIn.connectAll;
+)
+~globalParametersVariables[0]
+(
 ~notes = Array.newClear(128);
 
 MIDIdef.noteOn(\noteOnTest, {
@@ -242,23 +312,25 @@ MIDIdef.noteOn(\noteOnTest, {
 		[
 		\midi_num, noteNum,
 		\gate, 1,
-		\outputVolume, v * vel/(127.0 * 1.5),
-		\subOsc_amp, x,
-		\freq_cutoff, y,
-		\richness_mod	,z ,
-		\harmonic_mod, k,
-		\freq_lfo, d,
-		\depth_lfo, g,
+		\outputVolume, vel/(127.0 * 1.5),
+        \subOsc_amp, ~globalParametersVariables[10],
+        \freq_cutoff, ~globalParametersVariables[11],
+        \richness_mod	, ~globalParametersVariables[12],
+        \harmonic_mod, ~globalParametersVariables[13],
+        \freq_lfo, ~globalParametersVariables[8],
+        \depth_lfo, ~globalParametersVariables[9],
 
-		\attack_note, h,
-		\decay_note ,  p,
-		\sustain_note , j,
-		\release_note , l,
+        \attack_note, ~globalParametersVariables[0],
+        \decay_note ,  ~globalParametersVariables[1],
+        \sustain_note , ~globalParametersVariables[2],
+        \release_note , ~globalParametersVariables[3],
 
-		\attack_mod, q,
-		\decay_mod ,  w,
-		\sustain_mod,  e,
-		\release_mod,  r,
+        \attack_mod, ~globalParametersVariables[4],
+        \decay_mod ,  ~globalParametersVariables[5],
+        \sustain_mod,  ~globalParametersVariables[6],
+        \release_mod,  ~globalParametersVariables[7],
+
+
 		\harmonic_mod2, t,
 		\richness_mod2 , u,
 		//\carrierWaveform, i,
@@ -267,15 +339,9 @@ MIDIdef.noteOn(\noteOnTest, {
 		//\inharmonicity1, m,
 		//\inharmonicity2, n
 
-
-
-
 		]
-);
-
-};);
-
-
+	);
+});
 MIDIdef.noteOff(\noteOffTest, {
 	arg vel , noteNum;
 	[vel,noteNum].postln;
@@ -290,6 +356,16 @@ MIDIdef.noteOff(\noteOffTest, {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////                ARDUINO                                       /////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+SerialPort.cleanupAll
+SerialPort.listDevices
+
+(
+~port = SerialPort(
+    "COM9",
+    baudrate: 115200
+);
+)
+
 (
 ~getValues.stop;
 ~charArray= [ ];
@@ -347,10 +423,15 @@ MIDIdef.noteOff(\noteOffTest, {
 
 /////////////////// testing /////
 // todo: remove
+(
 for ( 0, ~notes.size,
 	{
 		arg i;
-		~notes[i].set(\depth_lfo, 0 + ~val1);
-		~notes[i].set(\gate, 0);
+		~notes[i].set(\subOsc_amp, 0.5);
+		// ~notes[i].set(\gate, 0);
 		// if(~notes[i]!=nil,{i.postln()}) // print active notes
 });
+)
+
+
+
