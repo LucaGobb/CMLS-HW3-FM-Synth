@@ -32,10 +32,10 @@ void oscEvent(OscMessage theOscMessage) {
         noteOff(theOscMessage.get(0).intValue());
         break;
       case("/harmonicity"):
-        harmRichness.setCursorX(theOscMessage.get(0).intValue());
+        harmRichness.setCursorX(theOscMessage.get(1).intValue());
         break;
       case("/richness"):
-        harmRichness.setCursorY(theOscMessage.get(0).intValue());
+        harmRichness.setCursorY(theOscMessage.get(1).intValue());
         break;
     default:
       break;
