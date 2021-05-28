@@ -22,6 +22,9 @@ void oscEvent(OscMessage theOscMessage) {
   println(" addrpattern: " + theOscMessage.addrPattern());
   println(" typetag: " + theOscMessage.typetag());
   println(" arg: " + theOscMessage.get(0).intValue());
+  //harmRichness1.setArrayValue(new float[] {7.0,8.0});
+  //harmRichness1.setCursorX(1);
+  
 
   // Not ON/ Note OFF
   switch(theOscMessage.addrPattern()) {
@@ -31,11 +34,17 @@ void oscEvent(OscMessage theOscMessage) {
       case("/noteOff"):
         noteOff(theOscMessage.get(0).intValue());
         break;
-      case("/harmonicity"):
-        harmRichness.setCursorX(theOscMessage.get(1).intValue());
+      case("/harmonicity1"):
+        harmRichness1.setCursorX(theOscMessage.get(0).intValue());
         break;
-      case("/richness"):
-        harmRichness.setCursorY(theOscMessage.get(1).intValue());
+      case("/richness1"):
+        harmRichness1.setCursorY(theOscMessage.get(0).intValue());
+        break;
+      case("/harmonicity2"):
+        harmRichness2.setCursorX(theOscMessage.get(0).intValue());
+        break;
+      case("/richness2"):
+        harmRichness2.setCursorY(theOscMessage.get(0).intValue());
         break;
     default:
       break;
