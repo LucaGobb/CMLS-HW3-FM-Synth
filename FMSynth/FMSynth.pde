@@ -28,7 +28,6 @@ void setup() {
  oscInit();
   guiInit();
   midiInit();
-  keyboardInit();
 
 }
 
@@ -38,5 +37,4 @@ void draw() {
    // Background
   setGradient(0, 0, width, height, primo, cobalto, X_AXIS);
 
-  keyboardUpdate();
 }

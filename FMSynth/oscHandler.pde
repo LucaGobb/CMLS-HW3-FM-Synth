@@ -1,3 +1,4 @@
+
 // OSC init
 public void oscInit() {
   osc = new OscP5(this, 12000);
@@ -25,19 +26,13 @@ void oscEvent(OscMessage theOscMessage) {
 
   // Not ON/ Note OFF
   switch(theOscMessage.addrPattern()) {
-      case("/noteOn"):
-        noteOn(theOscMessage.get(0).intValue());
-        break;
-      case("/noteOff"):
-        noteOff(theOscMessage.get(0).intValue());
-        break;
-      case("/harmonicity"):
-        harmRichness.setCursorX(theOscMessage.get(1).intValue());
-        break;
-      case("/richness"):
-        harmRichness.setCursorY(theOscMessage.get(1).intValue());
-        break;
-    default:
-      break;
+    case("/noteOn"):
+    noteOn(theOscMessage.get(0).intValue());
+    break;
+    case("/noteOff"):
+    noteOff(theOscMessage.get(0).intValue());
+    break;
+  default:
+    break;
   }
 }
