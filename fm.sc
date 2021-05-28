@@ -13,6 +13,8 @@ SynthDef(\fm, {
 	arg midi_num = 60, midi_val = 1.0, gate = 1,
 
 	// main parameters of modulator
+	carry_gate_sin = 1, carry_gate_tri = 0, carry_gate_saw = 0, carry_gate_squ = 0, // type of carry wave
+	contr_gate_sin = 1, contr_gate_tri = 0,	contr_gate_saw = 0,	contr_gate_squ = 0, // type of modulate wave
 	harmonic_mod = 2,    // order of harmonic sequence
 	richness_mod = 5.0,  // richness of harmonic
 	subOsc_amp   = 0.3,  // the level of sub oscillator
@@ -30,12 +32,12 @@ SynthDef(\fm, {
 	release_note = 0.7,
 
 	// lfo to modulate the fundamental frequency and modulator
-	freq_lfo = 0.4,
-	depth_lfo = 3.0,
+	freq_lfo = 60,
+	depth_lfo = 2.0,
 
 	// bus imformation
 	freq_cutoff = 5000.0,
-	output_volume = 1.0,
+	output_volume = 0.5,
 	pan = 0.0;
 
 	var env_mod = EnvGen.kr(Env.adsr(
@@ -59,13 +61,17 @@ SynthDef(\fm, {
 
 	var fundamental_freq = midi_num.midicps + control_lfo;
 
-	var control_mod = richness_mod * SinOsc.ar(
-		freq: fundamental_freq * harmonic_mod + control_lfo,
-		mul:  fundamental_freq * env_mod + control_lfo.fold(1)); // add a little randomness
+	var control_mod = richness_mod * (
+		(contr_gate_sin * SinOsc.ar(freq: fundamental_freq * harmonic_mod + control_lfo, mul:fundamental_freq * env_mod)) +
+		(contr_gate_tri * LFTri.ar (freq: fundamental_freq * harmonic_mod + control_lfo, mul:fundamental_freq * env_mod)) +
+		(contr_gate_saw * LFSaw.ar (freq: fundamental_freq * harmonic_mod + control_lfo, mul:fundamental_freq * env_mod)) +
+		(contr_gate_squ * LFSaw.ar (freq: fundamental_freq * harmonic_mod + control_lfo, mul:fundamental_freq * env_mod)));
 
-	var signal_modulated = SinOsc.ar(
-		freq: fundamental_freq + control_mod,
-		mul: env_note);
+	var signal_modulated = (
+		(carry_gate_sin * SinOsc.ar (freq: fundamental_freq + control_mod, mul: env_note)) +
+		(carry_gate_tri * LFTri.ar  (freq: fundamental_freq + control_mod, mul: env_note)) +
+		(carry_gate_saw * LFSaw.ar  (freq: fundamental_freq + control_mod, mul: env_note)) +
+		(carry_gate_squ * LFPulse.ar(freq: fundamental_freq + control_mod, width: 0.5, mul: env_note)));
 
 	var signal_subOsc = SinOsc.ar(
 		freq: fundamental_freq / 2.0,
@@ -107,7 +113,15 @@ keys = Array.newClear(128);
 
 	node = Synth.tail(nil, \fm, [
 		midi_num: num,
-		midi_val: val / (127.0)]);
+		midi_val: val / (127.0),
+		carry_gate_sin: 0,
+		carry_gate_tri: 1,
+		carry_gate_saw: 0,
+		carry_gate_squ: 0,
+		contr_gate_sin: 0,
+		contr_gate_tri: 0.7,
+		contr_gate_saw: 0.2,
+		contr_gate_squ: 0.1]);
 
 	keys.put(num, node);
 	[chan,num,val].postln;
