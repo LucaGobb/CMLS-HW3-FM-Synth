@@ -10,17 +10,16 @@ Textarea title;
 
 Textarea masterTitle ;
 
-Slider volume;
-Slider cutoffSlider;
+
+
 
 //LFO Elements
 Textarea LFOTitle;
 
-Textarea levels;
-float LFODepthValue;
-Slider LFODepthSlider;
-float LFORateValue;
-Slider LFORateSlider;
+Textarea subOscTitle;
+
+
+
 
 
 
@@ -28,35 +27,29 @@ Slider LFORateSlider;
 
 //Levels Controls
 Textarea filterTitle;
-Slider carrierLevelSlider;
-Slider modLevelSlider;
-Slider subOscLevelSlider;
+
+
+
 
 
 //Carrier Elements
 Textarea carrierLabel;
 Group carrierADRS;
-ListBox carrierWaveFormSelector ;
-Knob carrierLevelKnob;
-Knob modLevelKnob;
+
+
 
 //1rst Modulator Elements
 Textarea firstModLabel;
 Group firstModADRS;
-ListBox firstModWaveFormSelector ;
-Knob firstModLevel;
-Slider2D harmRichness;
 
 
 
 
 
 
+Textarea secondModLabel;
 
 
-//knob value
-float subOSCLevelValue;
-Knob subOscLevelKnob;
 
 
 

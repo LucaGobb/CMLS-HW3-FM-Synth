@@ -1,25 +1,58 @@
 //GUI init
+ListBox firstModWaveformSelector ;
+int firstModWaveform;
 
-float subOscLevel;
-float cutoff=15000;
-float[] harmonicity_richness = {3, 3}; 
-float[] daje = {8,5};
-float lfoRate;
-float lfoDepth;
+Slider inharmonicitySlider1;
+float inharmonicity1 = 0.0;
+
+Slider inharmonicitySlider2;
+float inharmonicity2 = 0.0;
+
+
+ListBox secondModWaveFormSelector;
+int secondModWaveform;
+
+ListBox carrierWaveFormSelector ;
+int carrierModWaveform;
+
+Slider carrierLevelSlider;
+float carrierLevel = 0.8;
+
+Slider subOscLevelSlider;
+float subOscLevel=  0.5;
+
+Slider cutoffSlider;
+float cutoff = 15000;
+
+Slider2D harmRichness1;
+float[] harmonicity_richness1 = {2,3};
+
+Slider2D harmRichness2;
+float[] harmonicity_richness2 = {3,2};
+
+Slider LFORateSlider;
+float lfoRate = 10;
+
+Slider LFODepthSlider;
+float lfoDepth = 3;
+
+Slider volumeSlider;
+float volume = 0.5;
+
 
 //Note ADSR
-float noteAttack; //0.05
-float noteDecay; //0.15
-float noteRelease; //0.4
-float noteSustain; //0.7
+float noteAttack = 0.05;
+float noteDecay = 0.15;
+float noteRelease = 0.4;
+float noteSustain = 0.7;
 
 
 
 //Mod ADSR
-float modAttack; //0.06
-float modDecay; //0.1
-float modRelease; //0.2
-float modSustain; //0.4
+float modAttack = 0.06; 
+float modDecay = 0.1;
+float modRelease = 0.2;
+float modSustain = 0.4;
 
 
 
@@ -32,7 +65,6 @@ public void guiInit() {
 //A network library for processing which supports UDP, TCP and Multicast. (should come with oscP5)
   import netP5.*;
 
-  subOSCLevelValue = 0.3;
   
 
 
@@ -56,14 +88,12 @@ public void guiInit() {
     .setFont(createFont("Courier new", 60))
     .setLineHeight(14)
     .setColor(myBlack)
-    //.setColorBackground(color(255,100))
-    //.setColorForeground(color(255,100));
     ;
   title.setText("FM Synthesizer" );  
   
   
   LFOTitle = cp5.addTextarea("LFOLabel")
-    .setPosition(700, 17)
+    .setPosition(20, 550)
     .setSize(100, 70)
     .setFont(createFont("Baskerville", 27))
     .setLineHeight(14)
@@ -71,7 +101,7 @@ public void guiInit() {
     .setText("LFO" );
     
   masterTitle = cp5.addTextarea("MasterLabel")
-    .setPosition(1200, 570)
+    .setPosition(700, 550)
     .setSize(220, 80)
     .setFont(createFont("Baskerville", 27))
     .setLineHeight(14)
@@ -79,13 +109,13 @@ public void guiInit() {
     .setText("Master Controls" );
     
 
-  levels = cp5.addTextarea("LevelsLabel")
-    .setPosition(700, 70)
+  subOscTitle = cp5.addTextarea("SubOscLabel")
+    .setPosition(170, 430) 
     .setSize(400, 70)
     .setFont(createFont("Baskerville", 27))
     .setLineHeight(14)
     .setColor(myBlack)
-    .setText("Levels" );  
+    .setText("Sub Oscillator" );  
     
 //Labels
 
@@ -101,20 +131,28 @@ public void guiInit() {
     .setText("Carrier Signal" );
 
     //For First Modulator
-    firstModLabel = cp5.addTextarea("Modulator Label.")
-    .setPosition(850, 150)
+    firstModLabel = cp5.addTextarea("First Modulator Label.")
+    .setPosition(690, 10)
     .setSize(400, 70)
     .setFont(createFont("Baskerville", 30))
     .setLineHeight(14)
     .setColor(myBlack)
-    .setText("Modulators Parameters" );
+    .setText("First Modulator" );
+    
+    secondModLabel = cp5.addTextarea("Second Modulator Label.")
+    .setPosition(1150, 10)
+    .setSize(400, 70)
+    .setFont(createFont("Baskerville", 30))
+    .setLineHeight(14)
+    .setColor(myBlack)
+    .setText("Second Modulator" );
     
    
 
 // Waveform Selectors
   
   //-Carrier
-    carrierWaveFormSelector = cp5.addListBox("Carrier Waveform")
+    carrierWaveFormSelector = cp5.addListBox("carrierModWaveform")
     .setCaptionLabel("Waveform")
     .setPosition(15, 250)
     .setSize(100, 100)
@@ -131,7 +169,7 @@ public void guiInit() {
     .addItem("Triangle", 3)
     .addItem("Saw", 4);
     
-  cp5.getController("Carrier Waveform")
+  cp5.getController("carrierModWaveform")
     .getCaptionLabel()
     .setFont(font)
     .setColor(myBlack)    
@@ -139,9 +177,9 @@ public void guiInit() {
     .setSize(17);
     
    //-First Modulator
-  firstModWaveFormSelector = cp5.addListBox("First Mod Waveform")
+  firstModWaveformSelector = cp5.addListBox("firstModWaveform")
     .setCaptionLabel("Waveform")
-    .setPosition(700, 250)
+    .setPosition(700, 60)
     .setSize(100, 100)
     .setItemHeight(30)
     .setBarHeight(20)
@@ -157,7 +195,33 @@ public void guiInit() {
     .addItem("Saw", 4);
         
     
-    cp5.getController("First Mod Waveform")
+    cp5.getController("firstModWaveform")
+    .getCaptionLabel()
+    .setFont(font)
+    .toUpperCase(false)
+    .setColor(myBlack)   
+    .setSize(17);
+    
+    
+      secondModWaveFormSelector = cp5.addListBox("secondModWaveform")
+    .setCaptionLabel("Waveform")
+    .setPosition(1200, 60)
+    .setSize(100, 100)
+    .setItemHeight(30)
+    .setBarHeight(20)
+    .setColorBackground(transparent)
+    .setColorActive(myBlack)
+    .setColorForeground(opaqueTransparent)
+    .setFont(createFont("Baskerville", 12))
+    .setHeight(140) 
+    .setWidth(110)
+    .addItem("Sine", 1)
+    .addItem("Square", 2)
+    .addItem("Triangle", 3)
+    .addItem("Saw", 4);
+        
+    
+    cp5.getController("secondModWaveform")
     .getCaptionLabel()
     .setFont(font)
     .toUpperCase(false)
@@ -178,7 +242,7 @@ public void guiInit() {
                 .activateEvent(true)
                 .setBackgroundColor(transparent)
                 .setBackgroundHeight(100)
-                .setLabel("ADSR")
+                .setLabel("Note Env")
                 .setColorBackground(transparent) 
                 .setBarHeight(18) 
                 .setColorForeground(opaqueTransparent)
@@ -190,14 +254,13 @@ public void guiInit() {
 
                 
     cp5.addSlider("noteAttack")
-    .setCaptionLabel("note Attack")
-    .setRange(0.01, 1.5)
-    .setValue(0.05)
+    .setCaptionLabel("A")
+    .setRange(0.004, 1.5)
+    .setValue(noteAttack)
      .setPosition(-70,10)
      .setSize(180,9)
      .setGroup(carrierADSR)
      .setColorBackground(opaqueTransparent)
-     //.setSliderMode(Slider.FLEXIBLE)
      .setColorActive(myBlack)
      .setColorTickMark(myBlack) 
      .setColorForeground(myBlack)
@@ -215,9 +278,9 @@ public void guiInit() {
 
      
   cp5.addSlider("noteDecay")
-     .setCaptionLabel("note Decay")
+     .setCaptionLabel("D")
      .setRange(0.01, 1.5)
-     .setValue(0.15)
+     .setValue(noteDecay)
      .setPosition(-70,30)
      .setSize(180,9)
      .setGroup(carrierADSR)
@@ -235,9 +298,9 @@ public void guiInit() {
      .setSize(17);
      ;
    cp5.addSlider("noteSustain")
-     .setCaptionLabel("note Sustain")
+     .setCaptionLabel("S")
      .setRange(0.01, 1.5)
-     .setValue(0.4)
+     .setValue(noteSustain)
      .setPosition(-70,50)
      .setSize(180,9)
      .setGroup(carrierADSR)
@@ -255,9 +318,9 @@ public void guiInit() {
      .setSize(17);
      ;
   cp5.addSlider("noteRelease")
-     .setCaptionLabel("note Release")
+     .setCaptionLabel("R")
      .setRange(0, 3)
-     .setValue(0.7)
+     .setValue(noteRelease)
      .setPosition(-70,70)
      .setSize(180,9)
      .setGroup(carrierADSR)
@@ -278,12 +341,12 @@ public void guiInit() {
                 
    //For First Modulator
      Group firstModADSR = cp5.addGroup("firstModADSR")
-                .setPosition(940, 260)
+                .setPosition(995, 80)
                 .setWidth(100)
                 .activateEvent(true)
                 .setBackgroundColor(transparent)
                 .setBackgroundHeight(100)
-                .setLabel("ADSR")
+                .setLabel("Mod Env")
                 .setColorBackground(transparent) 
                 .setBarHeight(18) 
                 .setColorForeground(opaqueTransparent)
@@ -291,9 +354,9 @@ public void guiInit() {
                 .setColorLabel(myBlack);
                 
   cp5.addSlider("modAttack")
-     .setCaptionLabel("mod Attack")
-     .setRange(0.01, 1.5)
-     .setValue(0.06)
+     .setCaptionLabel("A")
+     .setRange(0.0, 1.5)
+     .setValue(modAttack)
      .setPosition(-70,10)
      .setSize(180,9)
      .setGroup(firstModADSR)
@@ -314,9 +377,9 @@ public void guiInit() {
 
      
   cp5.addSlider("modDecay")
-     .setCaptionLabel("mod Decay")
-     .setRange(0.01, 1.5)
-     .setValue(0.1)
+     .setCaptionLabel("D")
+     .setRange(0.0, 1.5)
+     .setValue(modDecay)
      .setPosition(-70,30)
      .setSize(180,9)
      .setGroup(firstModADSR)
@@ -336,9 +399,9 @@ public void guiInit() {
      
      ;
   cp5.addSlider("modSustain")
-     .setCaptionLabel("mod Sustain")
-     .setRange(0.01, 1.5)
-     .setValue(0.2)
+     .setCaptionLabel("S")
+     .setRange(0.0, 1.5)
+     .setValue(modSustain)
      .setPosition(-70,50)
      .setSize(180,9)
      .setGroup(firstModADSR)
@@ -356,9 +419,9 @@ public void guiInit() {
      .setSize(17);
      ;
   cp5.addSlider("modRelease")
-     .setCaptionLabel("mod Release")
-     .setRange(0.01, 1.5)
-     .setValue(0.4)
+     .setCaptionLabel("R")
+     .setRange(0.0, 1.5)
+     .setValue(modRelease)
      .setPosition(-70,70)
      .setSize(180,9)
      .setGroup(firstModADSR)
@@ -379,9 +442,9 @@ public void guiInit() {
      
 //SLIDERS
 LFODepthSlider = cp5.addSlider("lfoDepth")
-    .setValue(3)
+    .setValue(lfoDepth)
     .setRange(0, 500)
-    .setPosition(865, 25)
+    .setPosition(185, 558)
     .setSize(100, 20)
     .setFont(createFont("Baskerville", 10))
     .setColorBackground(opaqueTransparent) 
@@ -393,9 +456,9 @@ LFODepthSlider = cp5.addSlider("lfoDepth")
 
 
 LFORateSlider = cp5.addSlider("lfoRate")
-    .setValue(0.5)
-    .setRange(0, 12)
-    .setPosition(1080, 25)
+    .setValue(lfoRate)
+    .setRange(0, 20)
+    .setPosition(400, 558)
     .setSize(100, 20)
     .setFont(createFont("Baskerville", 10))
     .setColorBackground(opaqueTransparent) 
@@ -406,22 +469,23 @@ LFORateSlider = cp5.addSlider("lfoRate")
     
 
 
-volume = cp5.addSlider("volume")
-    .setPosition(1200, 490)
-    .setSize(140, 20)
+volumeSlider = cp5.addSlider("volume")
+    .setValue(volume)
+    .setPosition(950, 558)
+    .setSize(100, 20)
     .setFont(createFont("Baskerville", 10))
     .setColorBackground(opaqueTransparent) 
     .setColorActive(myBlack) 
     .setColorCaptionLabel(myBlack) 
-    
+    .setRange(0,1)
     .setColorForeground(myBlack)
 ;
 cutoffSlider = cp5.addSlider("cutoff")
     .setRange(100, 20000)
     .setDefaultValue(15000)
-    .setPosition(1200, 520)
+    .setPosition(1150, 558)
     .setValue(15000)
-    .setSize(140, 20)
+    .setSize(100, 20)
     .setFont(createFont("Baskerville", 10))
     .setColorBackground(opaqueTransparent) 
     .setColorActive(myBlack) 
@@ -438,100 +502,92 @@ cutoffSlider = cp5.addSlider("cutoff")
   
   //CarrierKnob
   
-  
-  carrierLevelKnob = cp5.addKnob("carrierLevel")
-    .setCaptionLabel("Carrier Level")
-    .setRange(0, 1)
-    .setValue(0.8)
-    .setPosition(800, 60)
-    .setRadius(28)
-    .setDragDirection(Knob.VERTICAL)
-    .setFont(font)
-    .setColorForeground(black)
-    .setColorBackground(cobalto)
-    .setColorActive(myBlack-30)
-    .setColorValueLabel(myBlack)
-    ;
 
-  cp5.getController("carrierLevel")
-    .getCaptionLabel()
-    .setFont(createFont("Baskerville", 5))
-    .setColor(myBlack)
-    .toUpperCase(false)
-    .setSize(16);
-    
-//modLevelKnob
   
   
-  modLevelKnob = cp5.addKnob("modLevel")
-    .setCaptionLabel("Mod Level")
+  subOscLevelSlider = cp5.addSlider("subOscLevel")
+    .setValue(subOscLevel)
     .setRange(0, 1)
-    .setValue(0.8)
-    .setPosition(1000, 60)
-    .setRadius(28)
-    .setDragDirection(Knob.VERTICAL)
-    .setFont(font)
-    .setColorForeground(black)
-    .setColorBackground(cobalto)
-    .setColorActive(myBlack-30)
-    .setColorValueLabel(myBlack)
-    ;
-
-  cp5.getController("modLevel")
-    .getCaptionLabel()
-    .setFont(createFont("Baskerville", 5))
-    .setColor(myBlack)
-    .toUpperCase(false)
-    .setSize(16);
+    .setPosition(10, 440) //10, 160
+    .setSize(100, 20)
+    .setFont(createFont("Baskerville", 10))
+    .setColorBackground(opaqueTransparent) 
+    .setColorActive(myBlack) 
+    .setColorCaptionLabel(myBlack) 
     
+    .setColorForeground(myBlack)
+    .setCaptionLabel("Level");
+    
+
+  
+  
+
+inharmonicitySlider1 = cp5.addSlider("inharmonicity1")
+    .setValue(inharmonicity1)
+    .setRange(0, 1)
+    .setPosition(700,450) //10, 160
+    .setSize(100, 20)
+    .setFont(createFont("Baskerville", 10))
+    .setColorBackground(opaqueTransparent) 
+    .setColorActive(myBlack) 
+    .setColorCaptionLabel(myBlack) 
+    .setColorForeground(myBlack)
+    .setCaptionLabel("InHarmonicity");
+    
+inharmonicitySlider2 = cp5.addSlider("inharmonicity2")
+    .setValue(inharmonicity2)
+    .setRange(0, 1)
+    .setPosition(1160,450) //10, 160
+    .setSize(100, 20)
+    .setFont(createFont("Baskerville", 10))
+    .setColorBackground(opaqueTransparent) 
+    .setColorActive(myBlack) 
+    .setColorCaptionLabel(myBlack) 
+    .setColorForeground(myBlack)
+    .setCaptionLabel("InHarmonicity");
 
   
                 
                 
-//subOscKnob
-  
-  
-  subOscLevelKnob = cp5.addKnob("subOscLevel")
-    .setCaptionLabel("Sub Osc Level")
-    .setRange(0, 1)
-    .setValue(0.8)
-    .setPosition(1200, 60)
-    .setRadius(28)
-    .setDragDirection(Knob.VERTICAL)
-    .setFont(font)
-    .setColorForeground(black)
-    .setColorBackground(cobalto)
-    .setColorActive(myBlack-30)
-    .setColorValueLabel(myBlack);
+
     
 
-  cp5.getController("subOscLevel")
-    .getCaptionLabel()
-    .setFont(createFont("Baskerville", 5))
-    .setColor(myBlack)    
-    .toUpperCase(false)
-    .setSize(16);
+
     
-harmRichness = cp5.addSlider2D("harmonicity_richness")
-         .setPosition(1180,200)
+harmRichness1 = cp5.addSlider2D("harmonicity_richness1")
+         .setMaxX(10)
+         .setMaxY(10)
+         .setPosition(700,215)
          .setSize(200,180)
-         
-         .setArrayValue(daje)
+         .setArrayValue(harmonicity_richness1) //new float[] {2,5}
          .setColorBackground(opaqueTransparent) 
          .setColorForeground(cobalto)
          .setColorActive(myBlack)   
-         .setMaxX(10)
-         .setMaxY(10)
-         .setMinX(0.5)
-         .setMinY(0.5)
-         
          ;
          
+harmonicity_richness1 = harmRichness1.getArrayValue();
+
+harmRichness1
+.getCaptionLabel()
+.setFont(createFont("Baskerville", 5))
+.setColor(myBlack)
+.toUpperCase(false)
+.setSize(19);
+
+harmRichness2 = cp5.addSlider2D("harmonicity_richness2")
+         .setMaxX(10)
+         .setMaxY(10)
+         .setPosition(1160,215)
+         .setSize(200,180)
+         .setArrayValue(harmonicity_richness2) //new float[] {2,5}
+         .setColorBackground(opaqueTransparent) 
+         .setColorForeground(cobalto)
+         .setColorActive(myBlack)   
+         ;
          
+harmonicity_richness2 = harmRichness2.getArrayValue();
 
-
-    
-harmRichness
+harmRichness2
 .getCaptionLabel()
 .setFont(createFont("Baskerville", 5))
 .setColor(myBlack)
@@ -542,46 +598,72 @@ harmRichness
 }
 
 void controlEvent(ControlEvent theEvent) {
-  println(theEvent);
-  println(theEvent.getName());
-  if(theEvent.getName() != "harmonicity_richness"){ // todo: make the condition "if value is a single float"
-    sendOSCMessaggeKnob("/fromProcessing/" + theEvent.getName(), theEvent.value());
-  }else{
-    sendOSCMessaggeKnob("/fromProcessing/harmonicity", theEvent.getArrayValue(1));
-    sendOSCMessaggeKnob("/fromProcessing/richness", theEvent.getArrayValue(0));
-  };
+  OscMessage myMessage = new OscMessage("/fromProcessing"); //Rate & Depth
+  myMessage.add(subOscLevel);
+  myMessage.add(cutoff);
+  myMessage.add(harmonicity_richness1);
+  myMessage.add(lfoRate);
+  myMessage.add(lfoDepth);
+  myMessage.add(noteAttack);
+  myMessage.add(noteDecay);
+  myMessage.add(noteRelease);
+  myMessage.add(noteSustain);
+  myMessage.add(modAttack);
+  myMessage.add(modDecay);
+  myMessage.add(modRelease);
+  myMessage.add(modSustain);
+  
+
+  myMessage.add(harmonicity_richness2);
+  myMessage.add(volume);
+  myMessage.add(carrierModWaveform);  
+  myMessage.add(firstModWaveform);
+  myMessage.add(secondModWaveform);
+  myMessage.add(inharmonicity1);
+  myMessage.add(inharmonicity2);
   
   
-  //OscMessage myMessage = new OscMessage("/fromProcessing"); //Rate & Depth
-  //myMessage.add(subOscLevel);
-  //myMessage.add(cutoff);
-  //myMessage.add(harmonicity_richness);
-  //myMessage.add(lfoRate);
-  //myMessage.add(lfoDepth);
-  //myMessage.add(noteAttack); 
-  //myMessage.add(noteDecay);
-  //myMessage.add(noteRelease);
-  //myMessage.add(noteSustain);
-  //myMessage.add(modAttack);
-  //myMessage.add(modDecay);
-  //myMessage.add(modRelease);
-  //myMessage.add(modSustain);
-  //osc.send(myMessage, supercollider); 
-  //myMessage.print(); 
+   
+  
+  osc.send(myMessage, supercollider); 
+  myMessage.print();
+
+  
+
+  
+  
 }
 
 
-//Volume knob event
-/*void subOscLevel(float value) {
-  subOSCLevelValue = map(value, 0, 1, 0, 1.0);
-  sendOSCMessaggeKnob("/subOscLevel", subOSCLevelValue);
-  println("a knob event: " + subOSCLevelValue);
-}
 
-//LFODepth slider event
-void Depth(float value) {
-  LFODepthValue = map(value, 0, 1, 0, 10);
-  sendOSCMessaggeKnob("/LFODepth", LFODepthValue);
-  println("a knob event: " + LFODepthValue);
-}
-  */ 
+
+  
+                
+
+  
+
+     
+
+
+
+  
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+ 
+
+
+    
