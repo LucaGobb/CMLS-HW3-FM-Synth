@@ -2,11 +2,25 @@
 ListBox firstModWaveformSelector ;
 int firstModWaveform;
 
-Slider inharmonicitySlider1;
-float inharmonicity1 = 0.0;
+Slider coarseSlider1;
+float coarse1 = 0.0;
 
-Slider inharmonicitySlider2;
-float inharmonicity2 = 0.0;
+Slider coarseSlider2;
+float coarse2 = 0.0;
+
+Slider fineSlider1;
+float fine = 1.0;
+
+Slider fineSlider2;
+float fine2 = 1.0;
+
+Slider modLevelSlider1;
+float modLevel1 = 0.0;
+
+Slider modLevelSlider2;
+float modLevel2 = 0.0;
+
+
 
 
 ListBox secondModWaveFormSelector;
@@ -49,8 +63,8 @@ float noteSustain = 0.7;
 
 
 //Mod ADSR
-float modAttack = 0.06; 
-float modDecay = 0.1;
+float modAttack = 0.0; 
+float modDecay = 0.0;
 float modRelease = 0.2;
 float modSustain = 0.4;
 
@@ -522,29 +536,93 @@ cutoffSlider = cp5.addSlider("cutoff")
   
   
 
-inharmonicitySlider1 = cp5.addSlider("inharmonicity1")
-    .setValue(inharmonicity1)
-    .setRange(0, 1)
-    .setPosition(700,450) //10, 160
-    .setSize(100, 20)
+coarseSlider1 = cp5.addSlider("coarse1")
+    .setValue(coarse1)
+    .setRange(0.5, 9)
+    .setPosition(700,275) //10, 160
+    .setSize(180, 40)
     .setFont(createFont("Baskerville", 10))
     .setColorBackground(opaqueTransparent) 
     .setColorActive(myBlack) 
     .setColorCaptionLabel(myBlack) 
     .setColorForeground(myBlack)
-    .setCaptionLabel("InHarmonicity");
+    .setCaptionLabel("Coarse");
     
-inharmonicitySlider2 = cp5.addSlider("inharmonicity2")
-    .setValue(inharmonicity2)
-    .setRange(0, 1)
-    .setPosition(1160,450) //10, 160
-    .setSize(100, 20)
+coarseSlider2 = cp5.addSlider("coarse2")
+    .setValue(coarse2)
+    .setRange(0.5, 9.0)
+    .setPosition(1160,275) //10, 160
+    .setSize(180, 40)
     .setFont(createFont("Baskerville", 10))
     .setColorBackground(opaqueTransparent) 
     .setColorActive(myBlack) 
     .setColorCaptionLabel(myBlack) 
     .setColorForeground(myBlack)
-    .setCaptionLabel("InHarmonicity");
+    .setCaptionLabel("Coarse");
+    
+    
+    //Fine
+    
+    fineSlider1 = cp5.addSlider("fine")
+    .setValue(fine)
+    .setRange(1, 2)
+    .setPosition(700,335) //10, 160
+    .setSize(180, 40)
+    .setFont(createFont("Baskerville", 10))
+    .setColorBackground(opaqueTransparent) 
+    .setColorActive(myBlack) 
+    .setColorCaptionLabel(myBlack) 
+    .setColorForeground(myBlack)
+    .setCaptionLabel("fine");
+    
+  fineSlider2 = cp5.addSlider("fine2")
+    .setValue(fine2)
+    .setRange(1, 2)
+    .setPosition(1160,335) //10, 160
+    .setSize(180, 40)
+    .setFont(createFont("Baskerville", 10))
+    .setColorBackground(opaqueTransparent) 
+    .setColorActive(myBlack) 
+    .setColorCaptionLabel(myBlack) 
+    .setColorForeground(myBlack)
+    .setCaptionLabel("fine");
+    
+    //ModLevel
+    
+modLevelSlider1 = cp5.addSlider("modLevel1")
+    .setValue(modLevel1)
+    .setRange(0, 1)
+    .setPosition(700,215) //10, 160
+    .setSize(180, 40)
+    .setFont(createFont("Baskerville", 10))
+    .setColorBackground(opaqueTransparent) 
+    .setColorActive(myBlack) 
+    .setColorCaptionLabel(myBlack) 
+    .setColorForeground(myBlack)
+    .setCaptionLabel("Level");
+    
+    
+  modLevelSlider2 = cp5.addSlider("modLevel2")
+    .setValue(modLevel2)
+    .setRange(0, 1)
+    .setPosition(1160,215) //10, 160
+    .setSize(180, 40)
+    .setFont(createFont("Baskerville", 10))
+    .setColorBackground(opaqueTransparent) 
+    .setColorActive(myBlack) 
+    .setColorCaptionLabel(myBlack) 
+    .setColorForeground(myBlack)
+    .setCaptionLabel("Level");
+    
+    
+
+    
+    
+coarseSlider1.setNumberOfTickMarks(18)
+     .setColorTickMark(myBlack) ;
+
+coarseSlider2.setNumberOfTickMarks(18)
+     .setColorTickMark(myBlack) ;
 
   
                 
@@ -554,9 +632,10 @@ inharmonicitySlider2 = cp5.addSlider("inharmonicity2")
 
 
     
-harmRichness1 = cp5.addSlider2D("harmonicity_richness1")
-         .setMaxX(10)
+/*harmRichness1 = cp5.addSlider2D("harmonicity_richness1")
+         .setMaxX(4)
          .setMaxY(10)
+         .setMinX(0)
          .setPosition(700,215)
          .setSize(200,180)
          .setArrayValue(harmonicity_richness1) //new float[] {2,5}
@@ -575,7 +654,7 @@ harmRichness1
 .setSize(19);
 
 harmRichness2 = cp5.addSlider2D("harmonicity_richness2")
-         .setMaxX(10)
+         .setMaxX(5)
          .setMaxY(10)
          .setPosition(1160,215)
          .setSize(200,180)
@@ -592,52 +671,84 @@ harmRichness2
 .setFont(createFont("Baskerville", 5))
 .setColor(myBlack)
 .toUpperCase(false)
-.setSize(19);
+.setSize(19); */
     
     
 }
 
 void controlEvent(ControlEvent theEvent) {
-    println(theEvent);
-    println(theEvent.getName());
-    if(theEvent.getName() == "harmonicity_richness1"){ // todo: make the condition "if value is a single float"
-        //sendOSCMessaggeKnob("/fromProcessing/harmonicity1", theEvent.getArrayValue(1));
-        //sendOSCMessaggeKnob("/fromProcessing/richness1", theEvent.getArrayValue(0));
-        println("sending messages");
-    }else if(theEvent.getName() == "harmonicity_richness2"){
-        sendOSCMessaggeKnob("/fromProcessing/harmonicity2", theEvent.getArrayValue(1));
-        sendOSCMessaggeKnob("/fromProcessing/richness2", theEvent.getArrayValue(0));
-    }else{
-        sendOSCMessaggeKnob("/fromProcessing/" + theEvent.getName(), theEvent.value());
-    };
-
-
-  //OscMessage myMessage = new OscMessage("/fromProcessing"); //Rate & Depth
-  //myMessage.add(subOscLevel);
-  //myMessage.add(cutoff);
+  OscMessage myMessage = new OscMessage("/fromProcessing"); //Rate & Depth
+  myMessage.add(subOscLevel);
+  myMessage.add(cutoff);
   //myMessage.add(harmonicity_richness1);
-  //myMessage.add(lfoRate);
-  //myMessage.add(lfoDepth);
-  //myMessage.add(noteAttack);
-  //myMessage.add(noteDecay);
-  //myMessage.add(noteRelease);
-  //myMessage.add(noteSustain);
-  //myMessage.add(modAttack);
-  //myMessage.add(modDecay);
-  //myMessage.add(modRelease);
-  //myMessage.add(modSustain);
-
-
-  //myMessage.add(harmonicity_richness2);
-  //myMessage.add(volume);
-  //myMessage.add(carrierModWaveform);
-  //myMessage.add(firstModWaveform);
-  //myMessage.add(secondModWaveform);
-  //myMessage.add(inharmonicity1);
-  //myMessage.add(inharmonicity2);
+  myMessage.add(lfoRate);
+  myMessage.add(lfoDepth);
+  myMessage.add(noteAttack);
+  myMessage.add(noteDecay);
+  myMessage.add(noteRelease);
+  myMessage.add(noteSustain);
+  myMessage.add(modAttack);
+  myMessage.add(modDecay);
+  myMessage.add(modRelease);
+  myMessage.add(modSustain);
   
 
-  //osc.send(myMessage, supercollider);
-  //myMessage.print();
+  //myMessage.add(harmonicity_richness2);
+  myMessage.add(volume);
+  myMessage.add(carrierModWaveform);  
+  myMessage.add(firstModWaveform);
+  myMessage.add(secondModWaveform);
+  myMessage.add(coarse1);
+  myMessage.add(coarse2);
+  myMessage.add(fine);
+  myMessage.add(fine2);
+  myMessage.add(modLevel1);
+  myMessage.add(modLevel2);
+  
+  
+  
+  
+   
+  
+  osc.send(myMessage, supercollider); 
+  myMessage.print();
 
+  
+
+  
+  
 }
+
+
+
+
+  
+                
+
+  
+
+     
+
+
+
+  
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+ 
+
+
+    
