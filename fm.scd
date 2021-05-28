@@ -18,15 +18,15 @@ SynthDef(\fm, {
 	// information of input midi
 	arg midi_num = 60, midi_val = 1.0, gate = 1,
 
-
 	inharmonicity1 = 0.0,
 	inharmonicity2 = 0.0,
 
 	fine1 = 1,
 	fine2 = 1,
+	coarse1 = 1,
+	coarse2 = 1,
 
 	modLevel1 = 0.5,
-
 	modLevel2 = 0.5,
 
 	carrierWaveform = 0,
@@ -42,8 +42,6 @@ SynthDef(\fm, {
 	richness_mod2 = 5.0,
 
 	subOsc_amp   = 0.3,  // the level of the real sub oscillator
-
-
 
 
 	// envelope of modulator
@@ -92,14 +90,8 @@ SynthDef(\fm, {
 	var freq2 = fundamental_freq * coarse2 * fine2;
 
 
-
-
-
 	var modAmp1 = fundamental_freq * modLevel1;
 	var modAmp2= fundamental_freq * modLevel2;
-
-
-
 
 
 	//var harmonic_total = harmonic_mod + inharmonicity1;
@@ -120,8 +112,6 @@ SynthDef(\fm, {
 		freq: fundamental_freq + control_mod); /*,
 		mul: env_note */
 
-
-
 	var signal_subOsc = SinOsc.ar(
 		freq: fundamental_freq / 2.0,
 		mul: subOsc_amp * env_note);
@@ -141,16 +131,18 @@ SynthDef(\fm, {
 )
 
 x = Synth(\fm, [\midi_num , 60, \richness_mod ,10 , \harmonic_mod, 5, \richness_mod2 ,5 , \harmonic_mod2, 2.5]);
+x = Synth(\fm, [\midi_num , 60]);
 x.set(\gate, 0);
 x.free;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////                   OSC                                       /////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+(
 NetAddr("127.0.0.1", 57120);
 
 ~processingOut = NetAddr("127.0.0.1", 12000);
+)
 // todo: remove : test
 // ~processingOut.sendMsg("/from_SC", 23);
 // ~processingOut.sendMsg("/harmonicity", 3);
@@ -187,7 +179,7 @@ OSCdef('OSCreceiver',
 		m = msg[17];
 		n = msg[18];
 
-		f = round(msg[19] * 100) /100;
+		f = round(msg[19] * 100) /100; //fine regulations
 		b = round(msg[20] * 100) /100;
 
 		z = msg[21] * 100;
@@ -230,56 +222,88 @@ OSCdef('OSCreceiver',
 		postln("ModLevel1: "+z);
 		postln("ModLevel2: "+k);
 
-
-
-
 	},
 	"/fromProcessing");
 )
 
 
-
+//////////////////////////// remove
 OSCdef.freeAll
 //todo remove: test
 "\\release_note".postln()
 ~attack_note.value(5);
 ~attack_note_(5);
 ~attack_note.value()
-~attack_note = 6;
-
-(
-OSCdef.freeAll;
-~parametersName = [ //parameters starting with r are symbol to avoid cofusion with \r = "a capo"
-	"\attack_note",  "\decay_note", "\sustain_note", '\release_note',
-	"\attack_mod",   "\decay_mod",  "\sustain_mod",  '\release_mod',
-	'\freq_lfo',     "\depth_lfo",
-	"\subOsc_amp",   '\freq_cutoff',
-	'\richness_mod', "\harmonic_mod",
-	'\richness_mod2', "\harmonic_mod2"
-];
-~globalParametersVariables= [ // todo: those variables gets overwritten with the actual values
+~attack_note = 3;
+~globalParametersVariables[0].set(2)
+~globalParametersVariables[0].asRef.set(2)
+~globalParametersVariables
+/*~globalParametersVariables= [ // todo: those variables gets overwritten with the actual values
 	~attack_note,  ~decay_note, ~sustain_note, ~release_note,
 	~attack_mod,   ~decay_mod,  ~sustain_mod,  ~release_mod,
 	~freq_lfo,     ~depth_lfo,
     ~subOsc_amp,   ~freq_cutoff,
-	~richness_mod, ~harmonic_mod,
-	~richness_mod2, ~harmonic_mod2
-];
-~globalParametersVariables= [ // todo: those variables gets overwritten with the actual values
-	0.5,  0.5, 0.5, 0.5,
-	0.5,   0.5,  0.5,  0.5,
-	10,     10,
-    1,   15000,
-	1, 1,
-	1, 1
-];
+	~modlevel1, ~fine1, ~coarse1,
+	~modLevel2, ~fine2, ~coarse2,
+];*/
+// ~globalParametersVariables= [ // todo: those variables gets overwritten with the actual values
+// 	0.5,  0.5, 0.5, 0.5,
+// 	0.5,   0.5,  0.5,  0.5,
+// 	10,     10,
+// 	1,   15000,
+// 	1, 1, 1,
+// 	1, 1, 1
+// ];
+///////////////////////////////// remove
 
-["noteAttack","noteDecay","noteSustain","noteRelease",
+(
+OSCdef.freeAll;
+//names of the Synth parameters
+~parametersName = [ //parameters starting with r are symbol to avoid cofusion with \r = "a capo"
+	'\attack_note",  '\decay_note', '\sustain_note', '\release_note',
+	'\attack_mod",   '\decay_mod',  '\sustain_mod',  '\release_mod',
+	'\freq_lfo',     '\depth_lfo",
+	'\subOsc_amp",   '\freq_cutoff',
+	'\modLevel1", '\fine1', "\coarse1",
+	'\modLevel2', '\fine2', '\coarse2',
+	'\volume'
+];
+// todo
+// volume, firstModWaveform, secondModWaveform, carrierModWaveform,
+~setGlobalVariable = {
+	|index, val|
+	switch(index,
+		0,{~attack_note = val},
+		1,{~decay_note = val},
+		2,{~sustain_note = val},
+		3,{~release_note = val},
+		4,{~attack_mod = val},
+		5,{~decay_mod = val},
+		6,{~sustain_mod = val},
+		7,{~release_mod = val},
+		8,{~freq_lfo = val},
+		9,{~depth_lfo = val},
+		10,{~subOsc_amp = val},
+		11,{~freq_cutoff = val},
+		12,{~modlevel1 = val},
+		13,{~fine1 = val},
+		14,{~coarse1 = val},
+		15,{~modLevel2 = val},
+		16,{~fine2 = val},
+		17,{~coarse2 = val},
+		18,{~volume = val}
+	);
+};
+
+
+// array with path of the incoming osc Messages
+[   "noteAttack","noteDecay","noteSustain","noteRelease",
 	"modAttack","modDecay","modSustain","modRelease",
 	"lfoRate","lfoDepth",
 	"subOscLevel","cutoff",
-	"richness1","harmonicity1",
-	"richness2","harmonicity2"
+	"modLevel1", "fine",  "coarse1",
+	"modLevel2", "fine2", "coarse2",
+	"volume"
 ].do({
 	arg param, num;
 	OSCdef(param ++ 'OSCReceiver',{
@@ -291,10 +315,11 @@ OSCdef.freeAll;
 		});
 		~parametersName[num].post();
 		msg.postln();
-		// update global variables
+
+		~setGlobalVariable.set(num, msg[1]); // update global variables
 		// ~globalParametersVariables.at(num).value(msg[1]);
-		~globalParametersVariables[num] = msg[1];
-		~globalParametersVariables.postln();
+		// ~globalParametersVariables[num] = msg[1];
+		// ~globalParametersVariables.postln();
 	}, "/fromProcessing/" ++ param);
 	// ~parametersName[num].postln();
 });
@@ -317,6 +342,7 @@ MIDIClient.init;
 MIDIIn.connectAll;
 )
 
+(
 ~notes = Array.newClear(128);
 
 MIDIdef.noteOn(\noteOnTest, {
@@ -328,54 +354,79 @@ MIDIdef.noteOn(\noteOnTest, {
 		[
 		\midi_num, noteNum,
 		\gate, 1,
-		\outputVolume, v * vel/(127.0 * 1.5),
-		\subOsc_amp, ~globalParametersVariables[10],
-		\freq_cutoff, ~globalParametersVariables[11],
+			// \outputVolume, 1,
+		\outputVolume, ~volume * vel/(127.0),
+		\subOsc_amp, ~subOsc_amp,
+		\freq_cutoff, ~freq_cutoff,
 
-		//\richness_mod, ~globalParametersVariables[12],
-		//\harmonic_mod, ~globalParametersVariables[13],
+		\freq_lfo, ~freq_lfo,
+		\depth_lfo, ~depth_lfo,
 
-		\freq_lfo, ~globalParametersVariables[8],
-		\depth_lfo, ~globalParametersVariables[9],
+		\attack_note,  ~attack_note ,
+		\decay_note ,  ~decay_note ,
+		\sustain_note ,~sustain_note,
+		\release_note ,~release_note,
 
-		\attack_note, ~globalParametersVariables[0],
-		\decay_note ,  ~globalParametersVariables[1],
-		\sustain_note , ~globalParametersVariables[2],
-		\release_note , ~globalParametersVariables[3],
+		\attack_mod,  ~attack_mod,
+		\decay_mod ,  ~decay_mod,
+		\sustain_mod, ~sustain_mod,
+		\release_mod, ~release_mod,
 
-		\attack_mod, ~globalParametersVariables[4],
-		\decay_mod ,  ~globalParametersVariables[5],
-		\sustain_mod,  ~globalParametersVariables[6],
-		\release_mod,  ~globalParametersVariables[7],
-
-		//\harmonic_mod2, ~globalParametersVariables[14],
-		//\richness_mod2 , ~globalParametersVariables[15],
-		//\carrierWaveform, i,
-		\firstModWaveform,o,
-		\secondModWaveform, a,
-		\coarse1, m,
-		\coarse2, n,
-		\fine1, f,
-		\fine2, b,
-		\modLevel1, z,
-		\modLevel2, k
-
-
-
-
-
+		//\firstModWaveform,o,
+		//\secondModWaveform, a,
+		\coarse1, ~coarse1,
+		\coarse2, ~coarse2,
+		\fine1, ~fine1,
+		\fine2, ~fine2,
+		\modLevel1, ~modlevel1,
+		\modLevel2, ~modlevel2
 		]
+		// [
+		// 	\midi_num, noteNum,
+		// 	\gate, 1,
+		// 	\outputVolume, v * vel/(127.0 * 1.5),
+		// 	\subOsc_amp, ~globalParametersVariables[10],
+		// 	\freq_cutoff, ~globalParametersVariables[11],
+		//
+		// 	//\richness_mod, ~globalParametersVariables[12],
+		// 	//\harmonic_mod, ~globalParametersVariables[13],
+		//
+		// 	\freq_lfo, ~globalParametersVariables[8],
+		// 	\depth_lfo, ~globalParametersVariables[9],
+		//
+		// 	\attack_note, ~globalParametersVariables[0],
+		// 	\decay_note ,  ~globalParametersVariables[1],
+		// 	\sustain_note , ~globalParametersVariables[2],
+		// 	\release_note , ~globalParametersVariables[3],
+		//
+		// 	\attack_mod, ~globalParametersVariables[4],
+		// 	\decay_mod ,  ~globalParametersVariables[5],
+		// 	\sustain_mod,  ~globalParametersVariables[6],
+		// 	\release_mod,  ~globalParametersVariables[7],
+		//
+		// 	//\harmonic_mod2, ~globalParametersVariables[14],
+		// 	//\richness_mod2 , ~globalParametersVariables[15],
+		// 	//\carrierWaveform, i,
+		// 	\firstModWaveform,o,
+		// 	\secondModWaveform, a,
+		// 	\coarse1, m,
+		// 	\coarse2, n,
+		// 	\fine1, f,
+		// 	\fine2, b,
+		// 	\modLevel1, z,
+		// 	\modLevel2, k
+		// ]
 	);
 });
+
 MIDIdef.noteOff(\noteOffTest, {
 	arg vel , noteNum;
 	[vel,noteNum].postln;
 	~processingOut.sendMsg("\noteOff",noteNum);
 	~notes[noteNum].set(\gate, 0);
 	~notes[noteNum] = nil;
-}
+});
 
-);
 )
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

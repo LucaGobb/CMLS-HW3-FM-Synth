@@ -708,7 +708,7 @@ void controlEvent(ControlEvent theEvent) {
 
 
   //myMessage.add(harmonicity_richness2);
-  myMessage.add(volume);
+  //myMessage.add(volume);
   //myMessage.add(carrierModWaveform);
   //myMessage.add(firstModWaveform);
   //myMessage.add(secondModWaveform);
