@@ -600,11 +600,15 @@ harmRichness2
 void controlEvent(ControlEvent theEvent) {
     println(theEvent);
     println(theEvent.getName());
-    if(theEvent.getName() != "harmonicity_richness"){ // todo: make the condition "if value is a single float"
-        sendOSCMessaggeKnob("/fromProcessing/" + theEvent.getName(), theEvent.value());
+    if(theEvent.getName() == "harmonicity_richness1"){ // todo: make the condition "if value is a single float"
+        //sendOSCMessaggeKnob("/fromProcessing/harmonicity1", theEvent.getArrayValue(1));
+        //sendOSCMessaggeKnob("/fromProcessing/richness1", theEvent.getArrayValue(0));
+        println("sending messages");
+    }else if(theEvent.getName() == "harmonicity_richness2"){
+        sendOSCMessaggeKnob("/fromProcessing/harmonicity2", theEvent.getArrayValue(1));
+        sendOSCMessaggeKnob("/fromProcessing/richness2", theEvent.getArrayValue(0));
     }else{
-        sendOSCMessaggeKnob("/fromProcessing/harmonicity", theEvent.getArrayValue(1));
-        sendOSCMessaggeKnob("/fromProcessing/richness", theEvent.getArrayValue(0));
+        sendOSCMessaggeKnob("/fromProcessing/" + theEvent.getName(), theEvent.value());
     };
 
 
@@ -637,4 +641,3 @@ void controlEvent(ControlEvent theEvent) {
   //myMessage.print();
 
 }
-

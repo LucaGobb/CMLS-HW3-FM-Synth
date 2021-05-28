@@ -127,10 +127,11 @@ x.free;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////                   OSC                                       /////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+(
 NetAddr("127.0.0.1", 57120);
 
 ~processingOut = NetAddr("127.0.0.1", 12000);
+)
 // todo: remove : test
 // ~processingOut.sendMsg("/from_SC", 23);
 // ~processingOut.sendMsg("/harmonicity", 3);
@@ -241,20 +242,23 @@ OSCdef.freeAll;
 	"\attack_mod",   "\decay_mod",  "\sustain_mod",  '\release_mod',
 	'\freq_lfo',     "\depth_lfo",
 	"\subOsc_amp",   '\freq_cutoff',
-	'\richness_mod', "\harmonic_mod"
+	'\richness_mod', "\harmonic_mod",
+	'\richness_mod2', "\harmonic_mod2"
 ];
 ~globalParametersVariables= [ // todo: those variables gets overwritten with the actual values
 	~attack_note,  ~decay_note, ~sustain_note, ~release_note,
 	~attack_mod,   ~decay_mod,  ~sustain_mod,  ~release_mod,
 	~freq_lfo,     ~depth_lfo,
     ~subOsc_amp,   ~freq_cutoff,
-	~richness_mod, ~harmonic_mod
+	~richness_mod, ~harmonic_mod,
+	~richness_mod2, ~harmonic_mod2
 ];
 ~globalParametersVariables= [ // todo: those variables gets overwritten with the actual values
 	0.5,  0.5, 0.5, 0.5,
 	0.5,   0.5,  0.5,  0.5,
 	10,     10,
     1,   15000,
+	1, 1,
 	1, 1
 ];
 
@@ -262,7 +266,8 @@ OSCdef.freeAll;
 	"modAttack","modDecay","modSustain","modRelease",
 	"lfoRate","lfoDepth",
 	"subOscLevel","cutoff",
-	"richness","harmonicity"
+	"richness1","harmonicity1",
+	"richness2","harmonicity2"
 ].do({
 	arg param, num;
 	OSCdef(param ++ 'OSCReceiver',{
@@ -299,7 +304,7 @@ OSCdef.freeAll;
 MIDIClient.init;
 MIDIIn.connectAll;
 )
-~globalParametersVariables[0]
+
 (
 ~notes = Array.newClear(128);
 
@@ -315,7 +320,7 @@ MIDIdef.noteOn(\noteOnTest, {
 		\outputVolume, vel/(127.0 * 1.5),
         \subOsc_amp, ~globalParametersVariables[10],
         \freq_cutoff, ~globalParametersVariables[11],
-        \richness_mod	, ~globalParametersVariables[12],
+        \richness_mod, ~globalParametersVariables[12],
         \harmonic_mod, ~globalParametersVariables[13],
         \freq_lfo, ~globalParametersVariables[8],
         \depth_lfo, ~globalParametersVariables[9],
@@ -331,8 +336,8 @@ MIDIdef.noteOn(\noteOnTest, {
         \release_mod,  ~globalParametersVariables[7],
 
 
-		\harmonic_mod2, t,
-		\richness_mod2 , u,
+		\harmonic_mod2, ~globalParametersVariables[14],
+		\richness_mod2 , ~globalParametersVariables[15],
 		//\carrierWaveform, i,
 		\firstModWaveform,o,
 		\secondModWaveform, a,
@@ -367,6 +372,10 @@ SerialPort.listDevices
 )
 
 (
+~port = SerialPort(
+    "COM9",
+    baudrate: 115200
+);
 ~getValues.stop;
 ~charArray= [ ];
 ~getValues= Routine.new({
@@ -381,39 +390,44 @@ SerialPort.listDevices
 			});
 		if(ascii== $p, // pitch
 			{
-				~val1 = ~charArray.collect(_.digit).convertDigits /360;
+				~val1 = (~charArray.collect(_.digit).convertDigits /360*2  *10).asInteger();
 				~charArray= [ ];
-				// ~val1.postln();
+				// ~val1.post();
+				// "-".post();
 				// x.set(\depth_lfo, 0 + ~val1);
-				for ( 0, ~notes.size, { //update currently playing notes
-					arg i;
-					~notes[i].set(\depth_lfo, 0 + ~val1);
-					// if(~notes[i]!=nil,{i.postln()}) // print active notes
+				~notes.do({arg item, number; // update current playing notes
+					if(item != nil, {
+						~notes[number].set(\harmonic_mod, 0 + ~val1);
 					});
+				});
+				~processingOut.sendMsg("/harmonicity1", ~val1);
+				~globalParametersVariables[13] = ~val1;
+				~globalParametersVariables[13].postln();
+
 				// todo: remove: lag test on a single note
 				// ~notes[75].set(\depth_lfo, 0 + ~val1);
-				~processingOut.sendMsg("/harmonicity", ~val1);
 				// x.set(\midi_num, ~var1);
 		});
 		if(ascii== $r, // roll
 			{
-				~val2= ~charArray.collect(_.digit).convertDigits /360;
+				~val2= (~charArray.collect(_.digit).convertDigits /360 *2    *10).asInteger();
 				~charArray= [ ];
 				// ~val2.post();
-				for ( 0, ~notes.size, { //update currently playing notes
-					arg i;
-					~notes[i].set(\depth_lfo, 0 + ~val1);
-					// if(~notes[i]!=nil,{i.postln()}) // print active notes
+				~notes.do({arg item, number; // update current playing notes
+					if(item != nil, {
+						~notes[number].set(\richness_mod, 0 + ~val2);
 					});
-				~processingOut.sendMsg("/richness", ~val2);
+				});
+				~processingOut.sendMsg("/richness1", ~val2.asInteger());
+				// ~globalParametersVariables[12] = ~val1.asInteger();
 				// x.set(\freq_lfo, 2 + ~val2);
 		});
 		if(ascii== $y, //yaw
 			{
-				~val3= ~charArray.collect(_.digit).convertDigits;
+				~val3= ~charArray.collect(_.digit).convertDigits/360+0.5;
 				~charArray= [ ];
 				// (~val3/360).postln();
-				// (~val3).postln();
+				// ~val3.postln();
 				// x.set(\pan, 1.0 - (~val3/360.0*4).postln());
 		});
 	}.loop;
