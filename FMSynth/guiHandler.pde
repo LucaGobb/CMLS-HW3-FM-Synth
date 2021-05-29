@@ -316,7 +316,7 @@ public void guiInit() {
      ;
    cp5.addSlider("noteSustain")
      .setCaptionLabel("S")
-     .setRange(-1.5, 1.5)
+     .setRange(0, 1.5)
      .setValue(noteSustain)
      .setPosition(-70,50)
      .setSize(180,9)
@@ -634,8 +634,17 @@ void controlEvent(ControlEvent theEvent) {
 
   println(theEvent);
   println(theEvent.getName());
-  if(theEvent.getName().contains("modLevel")){
+  if(theEvent.getName().contains("ModWaveform")){
+    OscMessage myMessage = new OscMessage("/fromProcessing/waveformSelector");
+    myMessage.add(carrierModWaveform);
+    myMessage.add(firstModWaveform);
+    myMessage.add(secondModWaveform);
+    osc.send(myMessage, supercollider);
+    myMessage.print();
+  }else if(theEvent.getName().contains("modLevel")){
       sendOSCMessaggeKnob("/fromProcessing/" + theEvent.getName(), theEvent.value()*100);
+  }else if(theEvent.getName().contains("fine")){
+      sendOSCMessaggeKnob("/fromProcessing/" + theEvent.getName(), theEvent.value() + 1);
   }else{
       sendOSCMessaggeKnob("/fromProcessing/" + theEvent.getName(), theEvent.value());
   };
@@ -668,12 +677,7 @@ void controlEvent(ControlEvent theEvent) {
   myMessage.add(fine2);
   myMessage.add(modLevel1);
   myMessage.add(modLevel2);
-
-
-
-
-
-
+  
   osc.send(myMessage, supercollider);
   myMessage.print();
   */

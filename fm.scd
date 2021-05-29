@@ -25,9 +25,6 @@ SynthDef(\fm, {
 	mod2_sin = 1, mod2_triangle = 0, mod2_saw = 0,	 // type of first modulator wave
 
 
-
-
-
 	// main parameters of modulator
 
 	coarse1 = 2,
@@ -41,8 +38,6 @@ SynthDef(\fm, {
 
 
 	subOsc_amp   = 0.3,  // the level of the real sub oscillator
-
-
 
 
 	// envelope of modulator
@@ -172,10 +167,13 @@ SynthDef(\fm, {
 }).add;
 )
 
-x = Synth(\fm, [\midi_num , 60, \richness_mod ,10 , \harmonic_mod, 5, \richness_mod2 ,5 , \harmonic_mod2, 2.5]);
+x = Synth(\fm, [\midi_num , 60, \richness_mod ,11 , \harmonic_mod, 5, \richness_mod2 ,5 , \harmonic_mod2, 2.5]);
 x = Synth(\fm, [\midi_num , 60, \carrier_sin , 1, \subOsc_amp, 0]);
 x = Synth(\fm, [\midi_num , 60]);
 x.set(\gate, 0);
+x.set(\pan, 2);
+x.set(\depth_lfo, 50);
+x.set(\modLevel1, 5);
 x.free;
 
 
@@ -193,45 +191,78 @@ NetAddr("127.0.0.1", 57120);
 // ~processingOut.sendMsg("/richness", 5.0);
 
 (
-var carrierWaveformArray;
+/*var carrierWaveformArray;
 var firstModWaveformArray;
-var secondModWaveformArray;
+var secondModWaveformArray;*/
 
-(
+
 OSCdef('OSCreceiver',
 	{
 		arg msg;
-
-		x = msg[1]; //todo: rename with global variables
-		y = msg[2];
-		d = msg[3];
-		g = msg[4];
-
-		h = msg[5];
-		p = msg[6];
-		j = msg[7];
-		l = msg[8];
-
-
-		q = msg[9];
-		w = msg[10];
-		e = msg[11];
-		r = msg[12];
-
-		v = msg[13];
-
-
-		carrierWaveformArray = Array.fill(4, { arg i; 0 * i});
-		carrierWaveformArray[msg[14]] = 1;
+		//
+		// x = msg[1]; //todo: rename with global variables
+		// y = msg[2];
+		// d = msg[3];
+		// g = msg[4];
+		//
+		// h = msg[5];
+		// p = msg[6];
+		// j = msg[7];
+		// l = msg[8];
+		//
+		//
+		// q = msg[9];
+		// w = msg[10];
+		// e = msg[11];
+		// r = msg[12];
+		//
+		// v = msg[13];
 
 
-		firstModWaveformArray = Array.fill(3, { arg i; 0 * i});
-		firstModWaveformArray[msg[15]] = 1;
+		// carrierWaveformArray = Array.fill(4, { arg i; 0 * i});
+		// carrierWaveformArray[msg[14]] = 1;
+		//
+		//
+		// firstModWaveformArray = Array.fill(3, { arg i; 0 * i});
+		// firstModWaveformArray[msg[15]] = 1;
+		//
+		// secondModWaveformArray = Array.fill(3, { arg i; 0 * i});
+		// secondModWaveformArray[msg[16]] = 1;
 
-		secondModWaveformArray = Array.fill(3, { arg i; 0 * i});
-		secondModWaveformArray[msg[16]] = 1;
+		~carrierWaveformArray = Array.fill(4, { arg i; 0 * i});
+		~carrierWaveformArray[msg[1]] = 1;
 
 
+		~firstModWaveformArray = Array.fill(3, { arg i; 0 * i});
+		~firstModWaveformArray[msg[2]] = 1;
+
+		~secondModWaveformArray = Array.fill(3, { arg i; 0 * i});
+		~secondModWaveformArray[msg[3]] = 1;
+
+		"waveform selection".postln();
+		~carrierWaveformArray.post();
+		~firstModWaveformArray.post();
+		~secondModWaveformArray.postln();
+
+		~notes.do({arg item, number; // update current playing notes
+			if(item != nil, {
+				~notes[number].set(
+					\carrier_sin, ~carrierWaveformArray[0],
+					\carrier_square, ~carrierWaveformArray[1],
+					\carrier_triangle, ~carrierWaveformArray[2],
+					\carrier_saw, ~carrierWaveformArray[3],
+
+					\mod_sin, ~firstModWaveformArray[0],
+					\mod_triangle, ~firstModWaveformArray[1],
+					\mod_saw, ~firstModWaveformArray[2],
+
+					\mod2_sin, ~secondModWaveformArray[0],
+					\mod2_triangle, ~secondModWaveformArray[1],
+					\mod2_saw, ~secondModWaveformArray[2]
+				);
+			});
+		});
+/*
 		m = msg[17];
 		n = msg[18];
 
@@ -271,10 +302,10 @@ OSCdef('OSCreceiver',
 		postln("fine2: "+b);
 
 		postln("ModLevel1: "+ z);
-		postln("ModLevel2: "+ k);
+		postln("ModLevel2: "+ k);*/
 
 	},
-	"/fromProcessing");
+	"/fromProcessing/waveformSelector");
 )
 
 
@@ -296,7 +327,8 @@ OSCdef.freeAll
 	~freq_lfo,     ~depth_lfo,
     ~subOsc_amp,   ~freq_cutoff,
 	~modLevel1, ~fine1, ~coarse1,
-	~modLevel2, ~fine2, ~coarse2
+	~modLevel2, ~fine2, ~coarse2,
+	~volume
 ];
 )
 // ~globalParametersVariables= [ // todo: those variables gets overwritten with the actual values
@@ -309,8 +341,8 @@ OSCdef.freeAll
 // ];
 ///////////////////////////////// remove
 
-(
 OSCdef.freeAll;
+(
 //names of the Synth parameters
 ~parametersName = [ //parameters starting with r are symbol to avoid cofusion with \r = "a capo"
 	'\attack_note',  '\decay_note', '\sustain_note', '\release_note',
@@ -406,34 +438,47 @@ MIDIdef.noteOn(\noteOnTest, {
 	~notes[noteNum] = Synth.new(
 		\fm,
 		[
-		\midi_num, noteNum,
-		\gate, 1,
-			// \outputVolume, 1,
-			\outputVolume, ~volume.value() * vel/(127.0),
+			\midi_num, noteNum,
+			\gate, 1,
+			\outputVolume, ~volume * vel/(127.0),
 			\subOsc_amp, ~subOsc_amp.value(),
-		\freq_cutoff, ~freq_cutoff,
+			\freq_cutoff, ~freq_cutoff,
 
-		\freq_lfo, ~freq_lfo,
-		\depth_lfo, ~depth_lfo,
+			\freq_lfo, ~freq_lfo,
+			\depth_lfo, ~depth_lfo,
 
-		\attack_note,  ~attack_note ,
-		\decay_note ,  ~decay_note ,
-		\sustain_note ,~sustain_note,
-		\release_note ,~release_note,
+			\attack_note,  ~attack_note ,
+			\decay_note ,  ~decay_note ,
+			\sustain_note ,~sustain_note,
+			\release_note ,~release_note,
 
-		\attack_mod,  ~attack_mod,
-		\decay_mod ,  ~decay_mod,
-		\sustain_mod, ~sustain_mod,
-		\release_mod, ~release_mod,
+			\attack_mod,  ~attack_mod,
+			\decay_mod ,  ~decay_mod,
+			\sustain_mod, ~sustain_mod,
+			\release_mod, ~release_mod,
 
-		//\firstModWaveform,o,
-		//\secondModWaveform, a,
-		\coarse1, ~coarse1,
-		\coarse2, ~coarse2,
-		\fine1, ~fine1,
-		\fine2, ~fine2,
-		\modLevel1, ~modLevel1,
-		\modLevel2, ~modLevel2
+			//\firstModWaveform,o,
+			//\secondModWaveform, a,
+			\coarse1, ~coarse1,
+			\coarse2, ~coarse2,
+			\fine1, ~fine1,
+			\fine2, ~fine2,
+			\modLevel1, ~modLevel1,
+			\modLevel2, ~modLevel2,
+
+
+			\carrier_sin, ~carrierWaveformArray[0],
+			\carrier_square, ~carrierWaveformArray[1],
+			\carrier_triangle, ~carrierWaveformArray[2],
+			\carrier_saw, ~carrierWaveformArray[3],
+
+			\mod_sin, ~firstModWaveformArray[0],
+			\mod_triangle, ~firstModWaveformArray[1],
+			\mod_saw, ~firstModWaveformArray[2],
+
+			\mod2_sin, ~secondModWaveformArray[0],
+			\mod2_triangle, ~secondModWaveformArray[1],
+			\mod2_saw, ~secondModWaveformArray[2],
 		]
 		/*[
 		\midi_num, noteNum,
@@ -522,19 +567,19 @@ SerialPort.listDevices
 			});
 		if(ascii== $p, // pitch
 			{
-				~val1 = (~charArray.collect(_.digit).convertDigits /360*2  *10).asInteger();
+				~val1 = (~charArray.collect(_.digit).convertDigits /3.60*2).asInteger();
 				~charArray= [ ];
-				// ~val1.post();
-				// "-".post();
+				~val1.post();
+				"-".post();
 				// x.set(\depth_lfo, 0 + ~val1);
-				~notes.do({arg item, number; // update current playing notes
-					if(item != nil, {
-						~notes[number].set(\harmonic_mod, 0 + ~val1);
-					});
-				});
-				~processingOut.sendMsg("/harmonicity1", ~val1);
-				~globalParametersVariables[13] = ~val1;
-				~globalParametersVariables[13].postln();
+				// ~notes.do({arg item, number; // update current playing notes
+				// if(item != nil, {
+				// ~notes[number].set(\harmonic_mod, 0 + ~val1);
+				// });
+				// });
+				~processingOut.sendMsg("/modLevel1", ~val1/100);
+				// ~globalParametersVariables[13] = ~val1;
+				// ~globalParametersVariables[13].postln();
 
 				// todo: remove: lag test on a single note
 				// ~notes[75].set(\depth_lfo, 0 + ~val1);
@@ -542,24 +587,34 @@ SerialPort.listDevices
 		});
 		if(ascii== $r, // roll
 			{
-				~val2= (~charArray.collect(_.digit).convertDigits /360 *2    *10).asInteger();
+				~val2= (~charArray.collect(_.digit).convertDigits /3.60 *2).asInteger();
 				~charArray= [ ];
-				// ~val2.post();
-				~notes.do({arg item, number; // update current playing notes
-					if(item != nil, {
-						~notes[number].set(\richness_mod, 0 + ~val2);
-					});
-				});
-				~processingOut.sendMsg("/richness1", ~val2.asInteger());
+				~val2.post();
+				"-".post();
+				// ~notes.do({arg item, number; // update current playing notes
+				// 	if(item != nil, {
+				// 		~notes[number].set(\richness_mod, 0 + ~val2);
+				// 	});
+				// });
+				~processingOut.sendMsg("/modLevel2", ~val2/100);
 				// ~globalParametersVariables[12] = ~val1.asInteger();
 				// x.set(\freq_lfo, 2 + ~val2);
 		});
 		if(ascii== $y, //yaw
 			{
-				~val3= ~charArray.collect(_.digit).convertDigits/360+0.5;
+				~val3= ~charArray.collect(_.digit).convertDigits;
+				if(~val3>180,{~val3 = ~val3 - 360}); // wrap between -180 and 180
+				~val3 = (1 - ~val3/180+0.5); // from 0 to 1 in the angle of interest
+				~val3 = ~val3*(19000); // cutoff range
 				~charArray= [ ];
 				// (~val3/360).postln();
-				// ~val3.postln();
+				~val3.postln();
+				// ~notes.do({arg item, number; // update current playing notes
+				// 	if(item != nil, {
+				// 		~notes[number].set(\pan, 0 + ~val3.asFloat());
+				// 	});
+				// });
+				~processingOut.sendMsg("/cutoff", ~val3);
 				// x.set(\pan, 1.0 - (~val3/360.0*4).postln());
 		});
 	}.loop;
@@ -578,3 +633,4 @@ for ( 0, ~notes.size,
 		// if(~notes[i]!=nil,{i.postln()}) // print active notes
 });
 )
+{ Wrap.ar(SinOsc.ar(440, 0, 0.2), -0.15, 0.15) }.scope;
