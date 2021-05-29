@@ -343,7 +343,7 @@ OSCdef.freeAll;
 MIDIClient.init;
 MIDIIn.connectAll;
 )
-
+MIDIdef.freeAll;
 (
 ~notes = Array.newClear(128);
 
@@ -383,41 +383,36 @@ MIDIdef.noteOn(\noteOnTest, {
 		\modLevel1, ~modLevel1,
 		\modLevel2, ~modLevel2
 		]
-		// [
-		// 	\midi_num, noteNum,
-		// 	\gate, 1,
-		// 	\outputVolume, v * vel/(127.0 * 1.5),
-		// 	\subOsc_amp, ~globalParametersVariables[10],
-		// 	\freq_cutoff, ~globalParametersVariables[11],
-		//
-		// 	//\richness_mod, ~globalParametersVariables[12],
-		// 	//\harmonic_mod, ~globalParametersVariables[13],
-		//
-		// 	\freq_lfo, ~globalParametersVariables[8],
-		// 	\depth_lfo, ~globalParametersVariables[9],
-		//
-		// 	\attack_note, ~globalParametersVariables[0],
-		// 	\decay_note ,  ~globalParametersVariables[1],
-		// 	\sustain_note , ~globalParametersVariables[2],
-		// 	\release_note , ~globalParametersVariables[3],
-		//
-		// 	\attack_mod, ~globalParametersVariables[4],
-		// 	\decay_mod ,  ~globalParametersVariables[5],
-		// 	\sustain_mod,  ~globalParametersVariables[6],
-		// 	\release_mod,  ~globalParametersVariables[7],
-		//
-		// 	//\harmonic_mod2, ~globalParametersVariables[14],
-		// 	//\richness_mod2 , ~globalParametersVariables[15],
-		// 	//\carrierWaveform, i,
-		// 	\firstModWaveform,o,
-		// 	\secondModWaveform, a,
-		// 	\coarse1, m,
-		// 	\coarse2, n,
-		// 	\fine1, f,
-		// 	\fine2, b,
-		// 	\modLevel1, z,
-		// 	\modLevel2, k
-		// ]
+		/*[
+		\midi_num, noteNum,
+		\gate, 1,
+		\outputVolume, v * vel/(127.0 * 1.5),
+		\subOsc_amp, x,
+		\freq_cutoff, y,
+
+		\freq_lfo, d,
+		\depth_lfo, g,
+
+		\attack_note, h,
+		\decay_note ,  p,
+		\sustain_note , j,
+		\release_note , l,
+
+		\attack_mod, q,
+		\decay_mod ,  w,
+		\sustain_mod,  e,
+		\release_mod,  r,
+
+		//\carrierWaveform, i,
+		\firstModWaveform,o,
+		\secondModWaveform, a,
+		\coarse1, m,
+		\coarse2, n,
+		\fine1, f,
+		\fine2, b,
+		\modLevel1, z,
+		\modLevel2, k
+		]*/
 	);
 });
 

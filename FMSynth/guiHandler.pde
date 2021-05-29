@@ -679,13 +679,8 @@ harmRichness2
 void controlEvent(ControlEvent theEvent) {
   println(theEvent);
   println(theEvent.getName());
-  if(theEvent.getName() == "harmonicity_richness1"){ // todo: make the condition "if value is a single float"
-      //sendOSCMessaggeKnob("/fromProcessing/harmonicity1", theEvent.getArrayValue(1));
-      //sendOSCMessaggeKnob("/fromProcessing/richness1", theEvent.getArrayValue(0));
-      println("sending messages");
-  }else if(theEvent.getName() == "harmonicity_richness2"){
-      sendOSCMessaggeKnob("/fromProcessing/harmonicity2", theEvent.getArrayValue(1));
-      sendOSCMessaggeKnob("/fromProcessing/richness2", theEvent.getArrayValue(0));
+  if(theEvent.getName().contains("modLevel")){
+      sendOSCMessaggeKnob("/fromProcessing/" + theEvent.getName(), theEvent.value()*100);
   }else{
       sendOSCMessaggeKnob("/fromProcessing/" + theEvent.getName(), theEvent.value());
   };
@@ -694,7 +689,7 @@ void controlEvent(ControlEvent theEvent) {
   //OscMessage myMessage = new OscMessage("/fromProcessing"); //Rate & Depth
   //myMessage.add(subOscLevel);
   //myMessage.add(cutoff);
-  //myMessage.add(harmonicity_richness1);
+  ////myMessage.add(harmonicity_richness1);
   //myMessage.add(lfoRate);
   //myMessage.add(lfoDepth);
   //myMessage.add(noteAttack);
@@ -707,7 +702,7 @@ void controlEvent(ControlEvent theEvent) {
   //myMessage.add(modSustain);
 
 
-  //myMessage.add(harmonicity_richness2);
+  ////myMessage.add(harmonicity_richness2);
   //myMessage.add(volume);
   //myMessage.add(carrierModWaveform);
   //myMessage.add(firstModWaveform);
