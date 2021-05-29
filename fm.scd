@@ -11,7 +11,7 @@ FreqScope.new;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////                   SYNTH                                      /////////////////////////
+///////////////////////////               FM  SYNTH                                      /////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 (
 SynthDef(\fm, {
@@ -185,49 +185,14 @@ NetAddr("127.0.0.1", 57120);
 
 ~processingOut = NetAddr("127.0.0.1", 12000);
 )
-// todo: remove : test
-// ~processingOut.sendMsg("/from_SC", 23);
-// ~processingOut.sendMsg("/harmonicity", 3);
-// ~processingOut.sendMsg("/richness", 5.0);
+
+
+OSCdef.freeAll
 
 (
-/*var carrierWaveformArray;
-var firstModWaveformArray;
-var secondModWaveformArray;*/
-
-
-OSCdef('OSCreceiver',
+OSCdef('OSCreceiver', // for waveform selector
 	{
 		arg msg;
-		//
-		// x = msg[1]; //todo: rename with global variables
-		// y = msg[2];
-		// d = msg[3];
-		// g = msg[4];
-		//
-		// h = msg[5];
-		// p = msg[6];
-		// j = msg[7];
-		// l = msg[8];
-		//
-		//
-		// q = msg[9];
-		// w = msg[10];
-		// e = msg[11];
-		// r = msg[12];
-		//
-		// v = msg[13];
-
-
-		// carrierWaveformArray = Array.fill(4, { arg i; 0 * i});
-		// carrierWaveformArray[msg[14]] = 1;
-		//
-		//
-		// firstModWaveformArray = Array.fill(3, { arg i; 0 * i});
-		// firstModWaveformArray[msg[15]] = 1;
-		//
-		// secondModWaveformArray = Array.fill(3, { arg i; 0 * i});
-		// secondModWaveformArray[msg[16]] = 1;
 
 		~carrierWaveformArray = Array.fill(4, { arg i; 0 * i});
 		~carrierWaveformArray[msg[1]] = 1;
@@ -262,66 +227,12 @@ OSCdef('OSCreceiver',
 				);
 			});
 		});
-/*
-		m = msg[17];
-		n = msg[18];
-
-		f = (round(msg[19] * 100) /100) +1 ;
-		b = (round(msg[20] * 100) /100) +1;
-
-		z = msg[21] * 10; // multiply by 1000 because ModLevel is just from 0 to 1
-		k = msg[22]  * 10 ;
-
-
-		postln("SubOscLevel: "+x);
-		postln("CutOff: "+y);
-
-		postln("lFORate: "+d);
-		postln("lfoDepth: "+g);
-
-		postln("noteAttack: "+h);
-		postln("noteDecay: "+p);
-		postln("noteRelease: "+j);
-		postln("noteSustain: "+l);
-
-
-		postln("modAttack: "+q);
-		postln("modDecay: "+w);
-		postln("modRelease: "+e);
-		postln("modSustain: "+r);
-
-
-		postln("volume: "+v);
-
-
-
-		postln("coarse1: "+m);
-		postln("coarse2: "+n);
-
-		postln("fine1: "+f);
-		postln("fine2: "+b);
-
-		postln("ModLevel1: "+ z);
-		postln("ModLevel2: "+ k);*/
-
 	},
 	"/fromProcessing/waveformSelector");
 )
 
-
-//////////////////////////// remove
-OSCdef.freeAll
-//todo remove: test
-"\\release_note".postln()
-~attack_note.value(5);
-~attack_note_(5);
-~attack_note.value()
-~attack_note = 3;
-~globalParametersVariables[0].set(2)
-~globalParametersVariables[0].asRef.set(2)
-~globalParametersVariables;
 (
-~globalParametersVariables= [ // todo: those variables gets overwritten with the actual values
+~globalParametersVariables= [
 	~attack_note,  ~decay_note, ~sustain_note, ~release_note,
 	~attack_mod,   ~decay_mod,  ~sustain_mod,  ~release_mod,
 	~freq_lfo,     ~depth_lfo,
@@ -331,20 +242,10 @@ OSCdef.freeAll
 	~volume
 ];
 )
-// ~globalParametersVariables= [ // todo: those variables gets overwritten with the actual values
-// 	0.5,  0.5, 0.5, 0.5,
-// 	0.5,   0.5,  0.5,  0.5,
-// 	10,     10,
-// 	1,   15000,
-// 	1, 1, 1,
-// 	1, 1, 1
-// ];
-///////////////////////////////// remove
 
-OSCdef.freeAll;
 (
 //names of the Synth parameters
-~parametersName = [ //parameters starting with r are symbol to avoid cofusion with \r = "a capo"
+~parametersName = [
 	'\attack_note',  '\decay_note', '\sustain_note', '\release_note',
 	'\attack_mod',   '\decay_mod',  '\sustain_mod',  '\release_mod',
 	'\freq_lfo',     '\depth_lfo',
@@ -353,8 +254,7 @@ OSCdef.freeAll;
 	'\modLevel2', '\fine2', '\coarse2',
 	'\volume'
 ];
-// todo
-// volume, firstModWaveform, secondModWaveform, carrierModWaveform,
+
 ~setGlobalVariable = {
 	|index, val|
 	switch(index,
@@ -402,21 +302,10 @@ OSCdef.freeAll;
 		msg.postln();
 
 		~setGlobalVariable.set(num, msg[1]); // update global variables
-		// ~globalParametersVariables.at(num).value(msg[1]);
-		// ~globalParametersVariables[num] = msg[1];
-		// ~globalParametersVariables.postln();
+
 	}, "/fromProcessing/" ++ param);
-	// ~parametersName[num].postln();
 });
 )
-
-// todo: testing: remove
-~notes.do({arg item, number;
-	if(item != nil, {
-		~notes[number].set(~parametersName[12], 5);
-	});
-});
-~globalParametersVariables[11]
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -457,8 +346,6 @@ MIDIdef.noteOn(\noteOnTest, {
 			\sustain_mod, ~sustain_mod,
 			\release_mod, ~release_mod,
 
-			//\firstModWaveform,o,
-			//\secondModWaveform, a,
 			\coarse1, ~coarse1,
 			\coarse2, ~coarse2,
 			\fine1, ~fine1,
@@ -480,46 +367,6 @@ MIDIdef.noteOn(\noteOnTest, {
 			\mod2_triangle, ~secondModWaveformArray[1],
 			\mod2_saw, ~secondModWaveformArray[2],
 		]
-		/*[
-		\midi_num, noteNum,
-		\gate, 1,
-		\outputVolume, v * vel/(127.0 * 1.5),
-		\subOsc_amp, x,
-		\freq_cutoff, y,
-
-		\freq_lfo, d,
-		\depth_lfo, g,
-
-		\attack_note, h,
-		\decay_note ,  p,
-		\sustain_note , j,
-		\release_note , l,
-
-		\attack_mod, q,
-		\decay_mod ,  w,
-		\sustain_mod,  e,
-		\release_mod,  r,
-
-		\coarse1, m,
-		\coarse2, n,
-		\fine1, f,
-		\fine2, b,
-		\modLevel1, z,
-		\modLevel2, k,
-
-		\carrier_sin,carrierWaveformArray[0],
-		\carrier_square,carrierWaveformArray[1],
-		\carrier_triangle,carrierWaveformArray[2],
-		\carrier_saw, carrierWaveformArray[3],
-
-		\mod_sin,firstModWaveformArray[0],
-		\mod_triangle,firstModWaveformArray[1],
-		\mod_saw, firstModWaveformArray[2],
-
-		\mod2_sin,secondModWaveformArray[0],
-		\mod2_triangle,secondModWaveformArray[1],
-		\mod2_saw, secondModWaveformArray[2]
-		]*/
 	);
 });
 
@@ -559,9 +406,7 @@ SerialPort.listDevices
 	var ascii;
 	{
 		ascii= ~port.read.asAscii;
-		/*if(ascii==Char.binaryOpCharacters[5],{ //minus sign
-			~charArray= ~charArray.add(ascii)
-			});*/
+
 		if(ascii.isDecDigit,{
 			~charArray= ~charArray.add(ascii)
 			});
@@ -569,36 +414,17 @@ SerialPort.listDevices
 			{
 				~val1 = (~charArray.collect(_.digit).convertDigits /3.60*2).asInteger();
 				~charArray= [ ];
-				~val1.post();
-				"-".post();
-				// x.set(\depth_lfo, 0 + ~val1);
-				// ~notes.do({arg item, number; // update current playing notes
-				// if(item != nil, {
-				// ~notes[number].set(\harmonic_mod, 0 + ~val1);
-				// });
-				// });
+				// ~val1.post();
+				// "-".post();
 				~processingOut.sendMsg("/modLevel1", ~val1/100);
-				// ~globalParametersVariables[13] = ~val1;
-				// ~globalParametersVariables[13].postln();
-
-				// todo: remove: lag test on a single note
-				// ~notes[75].set(\depth_lfo, 0 + ~val1);
-				// x.set(\midi_num, ~var1);
 		});
 		if(ascii== $r, // roll
 			{
 				~val2= (~charArray.collect(_.digit).convertDigits /3.60 *2).asInteger();
 				~charArray= [ ];
-				~val2.post();
-				"-".post();
-				// ~notes.do({arg item, number; // update current playing notes
-				// 	if(item != nil, {
-				// 		~notes[number].set(\richness_mod, 0 + ~val2);
-				// 	});
-				// });
+				// ~val2.post();
+				// "-".post();
 				~processingOut.sendMsg("/modLevel2", ~val2/100);
-				// ~globalParametersVariables[12] = ~val1.asInteger();
-				// x.set(\freq_lfo, 2 + ~val2);
 		});
 		if(ascii== $y, //yaw
 			{
@@ -607,30 +433,10 @@ SerialPort.listDevices
 				~val3 = (1 - ~val3/180+0.5); // from 0 to 1 in the angle of interest
 				~val3 = ~val3*(19000); // cutoff range
 				~charArray= [ ];
-				// (~val3/360).postln();
-				~val3.postln();
-				// ~notes.do({arg item, number; // update current playing notes
-				// 	if(item != nil, {
-				// 		~notes[number].set(\pan, 0 + ~val3.asFloat());
-				// 	});
-				// });
+				// ~val3.postln();
 				~processingOut.sendMsg("/cutoff", ~val3);
-				// x.set(\pan, 1.0 - (~val3/360.0*4).postln());
 		});
 	}.loop;
 }
 ).play;
 )
-
-/////////////////// testing /////
-// todo: remove
-(
-for ( 0, ~notes.size,
-	{
-		arg i;
-		~notes[i].set(\subOsc_amp, 0.5);
-		// ~notes[i].set(\gate, 0);
-		// if(~notes[i]!=nil,{i.postln()}) // print active notes
-});
-)
-{ Wrap.ar(SinOsc.ar(440, 0, 0.2), -0.15, 0.15) }.scope;
