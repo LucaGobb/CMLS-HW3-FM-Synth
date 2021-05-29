@@ -18,30 +18,31 @@ SynthDef(\fm, {
 	// information of input midi
 	arg midi_num = 60, midi_val = 1.0, gate = 1,
 
-	inharmonicity1 = 0.0,
-	inharmonicity2 = 0.0,
+
+	// for the choice of the wave
+	carrier_sin = 1, carrier_square = 0, carrier_triangle = 0, carrier_saw = 0,  // type of carry wave
+	mod_sin = 1, mod_triangle = 0,	mod_saw = 0, // type of first modulator wave
+	mod2_sin = 1, mod2_triangle = 0, mod2_saw = 0,	 // type of first modulator wave
+
+
+
+
+
+	// main parameters of modulator
+
+	coarse1 = 2,
+	coarse2 = 6,
 
 	fine1 = 1,
 	fine2 = 1,
-	coarse1 = 1,
-	coarse2 = 1,
 
 	modLevel1 = 0.5,
 	modLevel2 = 0.5,
 
-	carrierWaveform = 0,
-	firstModWaveform = 0,
-	secondModWaveform = 0,
-
-
-	// main parameters of modulator
-	harmonic_mod = 2.0,    // order of harmonic sequence
-	richness_mod = 1.0,  // richness of harmonic
-
-	harmonic_mod2 = 3.0,
-	richness_mod2 = 5.0,
 
 	subOsc_amp   = 0.3,  // the level of the real sub oscillator
+
+
 
 
 	// envelope of modulator
@@ -69,8 +70,9 @@ SynthDef(\fm, {
 		attackTime: attack_mod,
 		decayTime: decay_mod,
 		sustainLevel: sustain_mod,
-		releaseTime: release_mod,
-		curve: [-4, 2, -9]));
+		releaseTime: release_mod ,
+		curve: 'lin'
+	));//[-4, 2, -9]
 
     var env_note = EnvGen.kr(Env.adsr(
 		attackTime: attack_note,
@@ -84,40 +86,80 @@ SynthDef(\fm, {
 		freq: freq_lfo,
 		mul: depth_lfo);
 
-	var fundamental_freq = midi_num.midicps ;
 
-	var freq1 = fundamental_freq * coarse1 * fine1; //fine1 va da 1 a 2
+	//We have 4 signals with frequencies :
+	   //1
+	var fundamental_freq = midi_num.midicps ; //From MIDI to Frequency
+	   //2
+	var freq1 = fundamental_freq * coarse1 * fine1;
+	   //3
 	var freq2 = fundamental_freq * coarse2 * fine2;
+	   //4
+	var freq3 = fundamental_freq /2;
 
+	//the third signal (second modulator) modulates the frequency of the second (first modulator), which in turn modulates the frequency of the first one, called carrier. The fourth signal is a Sub OScillator
 
+		//Modulation Amplitude
 	var modAmp1 = fundamental_freq * modLevel1;
-	var modAmp2= fundamental_freq * modLevel2;
+	var modAmp2 = fundamental_freq * modLevel2;
 
 
-	//var harmonic_total = harmonic_mod + inharmonicity1;
-	//var harmonic_total2 = harmonic_mod2 + inharmonicity2;
+
+	//second modulator frequency
+	var control_mod2_freq = freq2;
+
+	// signal (2nd modulator )
+	var control_mod2 = env_mod *
+	(
+	 	(mod2_sin * SinOsc.ar(freq: control_mod2_freq)) +
+		(mod2_triangle * LFTri.ar(freq: control_mod2_freq)) +
+		(mod2_saw * LFSaw.ar(freq: control_mod2_freq))
+
+	);
 
 
-	var control_mod2 = env_mod * modAmp2 * SinOsc.ar(
-		freq: freq2 + control_lfo);
-		/*,mul:  fundamental_freq * env_mod*/
+
+	//modulated frequency (first modulator frequency modulated by the second modulator)
+	var control_mod_freq = freq1 + (modAmp2 * (control_mod2)) + control_lfo;
+
+	// signal (2nd modulator )
+	var control_mod =  env_mod *
+	(
+		(mod_sin * SinOsc.ar(freq:control_mod_freq)) +
+		(mod_triangle * LFTri.ar(freq:control_mod_freq)) +
+		(mod_saw * LFSaw.ar(freq:control_mod_freq))
+
+	);
 
 
-	var control_mod = env_mod * modAmp1 * SinOsc.ar(
-		freq: freq1 + control_mod2 + control_lfo  );/*,
-		mul:  (fundamental_freq ) * env_mod*/
+	//modulated frequency (carrier frequency modulated by first modulator, whose frequency is modulated by the second modulator)
+	var modulated_signal_freq = fundamental_freq + ( modAmp1  * (control_mod ) );
+
+	//modulated Signal
+	var modulated_signal = env_note  *
+	(
+		(carrier_sin * SinOsc.ar(freq:modulated_signal_freq )!2) +
+		(carrier_square* LFPulse.ar(freq:modulated_signal_freq , width: 0.5)!2) +
+		(carrier_triangle* LFTri.ar(freq:modulated_signal_freq )!2) +
+		(carrier_saw * LFSaw.ar(freq:modulated_signal_freq )!2)
+
+	);
 
 
-	var signal_modulated_twice = env_note * SinOsc.ar(
-		freq: fundamental_freq + control_mod); /*,
-		mul: env_note */
+	var subOscFreq = fundamental_freq / 2;
 
-	var signal_subOsc = SinOsc.ar(
-		freq: fundamental_freq / 2.0,
-		mul: subOsc_amp * env_note);
+
+	var signal_subOsc = subOsc_amp * env_note *
+	(
+		(carrier_sin * SinOsc.ar(freq:subOscFreq)) +
+		(carrier_square* LFPulse.ar(freq:subOscFreq, width: 0.5)) +
+		(carrier_triangle* LFTri.ar(freq:subOscFreq)) +
+		(carrier_saw * LFSaw.ar(freq:subOscFreq))
+
+	);
 
 	var signal_master = Pan2.ar(
-		in: midi_val * (signal_modulated_twice + signal_subOsc),
+		in: midi_val * (modulated_signal + signal_subOsc),
 		pos: pan,
 		level: outputVolume);
 
@@ -131,9 +173,11 @@ SynthDef(\fm, {
 )
 
 x = Synth(\fm, [\midi_num , 60, \richness_mod ,10 , \harmonic_mod, 5, \richness_mod2 ,5 , \harmonic_mod2, 2.5]);
+x = Synth(\fm, [\midi_num , 60, \carrier_sin , 1, \subOsc_amp, 0]);
 x = Synth(\fm, [\midi_num , 60]);
 x.set(\gate, 0);
 x.free;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////                   OSC                                       /////////////////////////
@@ -147,6 +191,11 @@ NetAddr("127.0.0.1", 57120);
 // ~processingOut.sendMsg("/from_SC", 23);
 // ~processingOut.sendMsg("/harmonicity", 3);
 // ~processingOut.sendMsg("/richness", 5.0);
+
+(
+var carrierWaveformArray;
+var firstModWaveformArray;
+var secondModWaveformArray;
 
 (
 OSCdef('OSCreceiver',
@@ -171,25 +220,30 @@ OSCdef('OSCreceiver',
 
 		v = msg[13];
 
-		i = msg[14];
-		o = msg[15];
-		a = msg[16];
+
+		carrierWaveformArray = Array.fill(4, { arg i; 0 * i});
+		carrierWaveformArray[msg[14]] = 1;
+
+
+		firstModWaveformArray = Array.fill(3, { arg i; 0 * i});
+		firstModWaveformArray[msg[15]] = 1;
+
+		secondModWaveformArray = Array.fill(3, { arg i; 0 * i});
+		secondModWaveformArray[msg[16]] = 1;
 
 
 		m = msg[17];
 		n = msg[18];
 
-		f = round(msg[19] * 100) /100; //fine regulations
-		b = round(msg[20] * 100) /100;
+		f = (round(msg[19] * 100) /100) +1 ;
+		b = (round(msg[20] * 100) /100) +1;
 
-		z = msg[21] * 100;
-		k = msg[22] * 100;
+		z = msg[21] * 10; // multiply by 1000 because ModLevel is just from 0 to 1
+		k = msg[22]  * 10 ;
 
 
 		postln("SubOscLevel: "+x);
 		postln("CutOff: "+y);
-		//postln("Harmonicity: "+z);
-		//postln("Richness: "+k);
 
 		postln("lFORate: "+d);
 		postln("lfoDepth: "+g);
@@ -208,9 +262,6 @@ OSCdef('OSCreceiver',
 
 		postln("volume: "+v);
 
-		postln("carrierWaveform: "+i);
-		postln("firstModWaveform: "+o);
-		postln("secondModWaveform: "+a);
 
 
 		postln("coarse1: "+m);
@@ -219,8 +270,8 @@ OSCdef('OSCreceiver',
 		postln("fine1: "+f);
 		postln("fine2: "+b);
 
-		postln("ModLevel1: "+z);
-		postln("ModLevel2: "+k);
+		postln("ModLevel1: "+ z);
+		postln("ModLevel2: "+ k);
 
 	},
 	"/fromProcessing");
@@ -344,6 +395,7 @@ MIDIClient.init;
 MIDIIn.connectAll;
 )
 MIDIdef.freeAll;
+
 (
 ~notes = Array.newClear(128);
 
@@ -403,15 +455,25 @@ MIDIdef.noteOn(\noteOnTest, {
 		\sustain_mod,  e,
 		\release_mod,  r,
 
-		//\carrierWaveform, i,
-		\firstModWaveform,o,
-		\secondModWaveform, a,
 		\coarse1, m,
 		\coarse2, n,
 		\fine1, f,
 		\fine2, b,
 		\modLevel1, z,
-		\modLevel2, k
+		\modLevel2, k,
+
+		\carrier_sin,carrierWaveformArray[0],
+		\carrier_square,carrierWaveformArray[1],
+		\carrier_triangle,carrierWaveformArray[2],
+		\carrier_saw, carrierWaveformArray[3],
+
+		\mod_sin,firstModWaveformArray[0],
+		\mod_triangle,firstModWaveformArray[1],
+		\mod_saw, firstModWaveformArray[2],
+
+		\mod2_sin,secondModWaveformArray[0],
+		\mod2_triangle,secondModWaveformArray[1],
+		\mod2_saw, secondModWaveformArray[2]
 		]*/
 	);
 });
@@ -421,9 +483,11 @@ MIDIdef.noteOff(\noteOffTest, {
 	[vel,noteNum].postln;
 	~processingOut.sendMsg("\noteOff",noteNum);
 	~notes[noteNum].set(\gate, 0);
-	~notes[noteNum] = nil;
-});
+	~notes[noteNum].release;
 
+	~notes[noteNum] = nil;
+	~notes[noteNum].free;
+});
 )
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
