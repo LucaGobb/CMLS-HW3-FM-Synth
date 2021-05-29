@@ -12,6 +12,11 @@ int pitch = 0;
 int roll = 0;
 float yaw = 0;
 
+unsigned long previuosTime = 0;
+unsigned long interval = 50; // to not overload supercollider
+
+unsigned long myTime;
+
 void setup() {
   Serial.begin(115200);
 //  Serial.begin(9600);
@@ -50,11 +55,24 @@ void loop() {
     yaw += normGyro.ZAxis;
   }
 
+
   //Keep our angle between 0-359 degrees
   if (yaw < 0)
     yaw += 360;
   else if (yaw > 359)
     yaw -= 360;
+
+//  clip pitch
+  if (pitch < 0)
+    pitch = 0;
+  else if (pitch > 180)
+    pitch = 180;
+
+//  clip roll
+  if (roll < 0)
+    roll = 0;
+  else if (roll > 180)
+    roll = 180;
 
   // Output
 //  Serial.print("Pitch = ");
@@ -66,14 +84,16 @@ void loop() {
 
 //  Serial.println();
 
-  Serial.print(pitch); //output the value,then separate through corresponding charcacter
-  Serial.print("p");
-  Serial.print(roll);
-  Serial.print("r");
-  Serial.print(int(yaw));
-  Serial.print("y");
-
-
+  myTime = millis();
+  if(myTime - previuosTime > interval){
+    previuosTime = myTime;
+    Serial.print(pitch); //output the value, then separate through corresponding charcacter
+    Serial.print("p");
+    Serial.print(roll);
+    Serial.print("r");
+    Serial.print(int(yaw));
+    Serial.println("y");
+  }
   delay(10);
 }
 
