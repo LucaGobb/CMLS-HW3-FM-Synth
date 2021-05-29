@@ -1,18 +1,17 @@
 //GUI init
-ListBox firstModWaveformSelector ;
-int firstModWaveform;
+
 
 Slider coarseSlider1;
-float coarse1 = 0.0;
+float coarse1 = 1;
 
 Slider coarseSlider2;
-float coarse2 = 0.0;
+float coarse2 = 1;
 
 Slider fineSlider1;
-float fine = 1.0;
+float fine = 0.0;
 
 Slider fineSlider2;
-float fine2 = 1.0;
+float fine2 = 0.0;
 
 Slider modLevelSlider1;
 float modLevel1 = 0.0;
@@ -20,14 +19,16 @@ float modLevel1 = 0.0;
 Slider modLevelSlider2;
 float modLevel2 = 0.0;
 
+ListBox carrierWaveFormSelector ;
+int carrierModWaveform= 0;
 
-
+ListBox firstModWaveformSelector ;
+int firstModWaveform = 0;
 
 ListBox secondModWaveFormSelector;
-int secondModWaveform;
+int secondModWaveform = 0;
 
-ListBox carrierWaveFormSelector ;
-int carrierModWaveform;
+
 
 Slider carrierLevelSlider;
 float carrierLevel = 0.8;
@@ -183,6 +184,10 @@ public void guiInit() {
     .addItem("Triangle", 3)
     .addItem("Saw", 4);
 
+
+
+
+
   cp5.getController("carrierModWaveform")
     .getCaptionLabel()
     .setFont(font)
@@ -204,9 +209,8 @@ public void guiInit() {
     .setHeight(140)
     .setWidth(110)
     .addItem("Sine", 1)
-    .addItem("Square", 2)
-    .addItem("Triangle", 3)
-    .addItem("Saw", 4);
+    .addItem("Triangle", 2)
+    .addItem("Saw", 3);
 
 
     cp5.getController("firstModWaveform")
@@ -230,9 +234,8 @@ public void guiInit() {
     .setHeight(140)
     .setWidth(110)
     .addItem("Sine", 1)
-    .addItem("Square", 2)
-    .addItem("Triangle", 3)
-    .addItem("Saw", 4);
+    .addItem("Triangle", 2)
+    .addItem("Saw", 3);
 
 
     cp5.getController("secondModWaveform")
@@ -269,7 +272,7 @@ public void guiInit() {
 
     cp5.addSlider("noteAttack")
     .setCaptionLabel("A")
-    .setRange(0.004, 1.5)
+    .setRange(0.004, 3)
     .setValue(noteAttack)
      .setPosition(-70,10)
      .setSize(180,9)
@@ -313,7 +316,7 @@ public void guiInit() {
      ;
    cp5.addSlider("noteSustain")
      .setCaptionLabel("S")
-     .setRange(0.01, 1.5)
+     .setRange(-1.5, 1.5)
      .setValue(noteSustain)
      .setPosition(-70,50)
      .setSize(180,9)
@@ -333,7 +336,7 @@ public void guiInit() {
      ;
   cp5.addSlider("noteRelease")
      .setCaptionLabel("R")
-     .setRange(0, 3)
+     .setRange(0, 5)
      .setValue(noteRelease)
      .setPosition(-70,70)
      .setSize(180,9)
@@ -369,7 +372,7 @@ public void guiInit() {
 
   cp5.addSlider("modAttack")
      .setCaptionLabel("A")
-     .setRange(0.0, 1.5)
+     .setRange(0.0, 3)
      .setValue(modAttack)
      .setPosition(-70,10)
      .setSize(180,9)
@@ -392,7 +395,7 @@ public void guiInit() {
 
   cp5.addSlider("modDecay")
      .setCaptionLabel("D")
-     .setRange(0.0, 1.5)
+     .setRange(0.0, 5)
      .setValue(modDecay)
      .setPosition(-70,30)
      .setSize(180,9)
@@ -414,7 +417,7 @@ public void guiInit() {
      ;
   cp5.addSlider("modSustain")
      .setCaptionLabel("S")
-     .setRange(0.0, 1.5)
+     .setRange(0, 10)
      .setValue(modSustain)
      .setPosition(-70,50)
      .setSize(180,9)
@@ -434,7 +437,7 @@ public void guiInit() {
      ;
   cp5.addSlider("modRelease")
      .setCaptionLabel("R")
-     .setRange(0.0, 1.5)
+     .setRange(0.0, 10)
      .setValue(modRelease)
      .setPosition(-70,70)
      .setSize(180,9)
@@ -457,14 +460,13 @@ public void guiInit() {
 //SLIDERS
 LFODepthSlider = cp5.addSlider("lfoDepth")
     .setValue(lfoDepth)
-    .setRange(0, 500)
+    .setRange(0, 30)
     .setPosition(185, 558)
     .setSize(100, 20)
     .setFont(createFont("Baskerville", 10))
     .setColorBackground(opaqueTransparent)
     .setColorActive(myBlack)
     .setColorCaptionLabel(myBlack)
-    .setRange(0, 200)
     .setColorForeground(myBlack)
     .setCaptionLabel("Depth");
 
@@ -521,7 +523,7 @@ cutoffSlider = cp5.addSlider("cutoff")
 
   subOscLevelSlider = cp5.addSlider("subOscLevel")
     .setValue(subOscLevel)
-    .setRange(0, 1)
+    .setRange(0, 2)
     .setPosition(10, 440) //10, 160
     .setSize(100, 20)
     .setFont(createFont("Baskerville", 10))
@@ -538,7 +540,7 @@ cutoffSlider = cp5.addSlider("cutoff")
 
 coarseSlider1 = cp5.addSlider("coarse1")
     .setValue(coarse1)
-    .setRange(0.5, 9)
+    .setRange(1, 10)
     .setPosition(700,275) //10, 160
     .setSize(180, 40)
     .setFont(createFont("Baskerville", 10))
@@ -550,7 +552,7 @@ coarseSlider1 = cp5.addSlider("coarse1")
 
 coarseSlider2 = cp5.addSlider("coarse2")
     .setValue(coarse2)
-    .setRange(0.5, 9.0)
+    .setRange(1, 10)
     .setPosition(1160,275) //10, 160
     .setSize(180, 40)
     .setFont(createFont("Baskerville", 10))
@@ -565,7 +567,7 @@ coarseSlider2 = cp5.addSlider("coarse2")
 
     fineSlider1 = cp5.addSlider("fine")
     .setValue(fine)
-    .setRange(1, 2)
+    .setRange(0, 1)
     .setPosition(700,335) //10, 160
     .setSize(180, 40)
     .setFont(createFont("Baskerville", 10))
@@ -577,7 +579,7 @@ coarseSlider2 = cp5.addSlider("coarse2")
 
   fineSlider2 = cp5.addSlider("fine2")
     .setValue(fine2)
-    .setRange(1, 2)
+    .setRange(0, 1)
     .setPosition(1160,335) //10, 160
     .setSize(180, 40)
     .setFont(createFont("Baskerville", 10))
@@ -618,65 +620,18 @@ modLevelSlider1 = cp5.addSlider("modLevel1")
 
 
 
-coarseSlider1.setNumberOfTickMarks(18)
+coarseSlider1.setNumberOfTickMarks(10)
      .setColorTickMark(myBlack) ;
 
-coarseSlider2.setNumberOfTickMarks(18)
+coarseSlider2.setNumberOfTickMarks(10)
      .setColorTickMark(myBlack) ;
 
-
-
-
-
-
-
-
-
-/*harmRichness1 = cp5.addSlider2D("harmonicity_richness1")
-         .setMaxX(4)
-         .setMaxY(10)
-         .setMinX(0)
-         .setPosition(700,215)
-         .setSize(200,180)
-         .setArrayValue(harmonicity_richness1) //new float[] {2,5}
-         .setColorBackground(opaqueTransparent)
-         .setColorForeground(cobalto)
-         .setColorActive(myBlack)
-         ;
-
-harmonicity_richness1 = harmRichness1.getArrayValue();
-
-harmRichness1
-.getCaptionLabel()
-.setFont(createFont("Baskerville", 5))
-.setColor(myBlack)
-.toUpperCase(false)
-.setSize(19);
-
-harmRichness2 = cp5.addSlider2D("harmonicity_richness2")
-         .setMaxX(5)
-         .setMaxY(10)
-         .setPosition(1160,215)
-         .setSize(200,180)
-         .setArrayValue(harmonicity_richness2) //new float[] {2,5}
-         .setColorBackground(opaqueTransparent)
-         .setColorForeground(cobalto)
-         .setColorActive(myBlack)
-         ;
-
-harmonicity_richness2 = harmRichness2.getArrayValue();
-
-harmRichness2
-.getCaptionLabel()
-.setFont(createFont("Baskerville", 5))
-.setColor(myBlack)
-.toUpperCase(false)
-.setSize(19); */
 
 
 }
 
 void controlEvent(ControlEvent theEvent) {
+
   println(theEvent);
   println(theEvent.getName());
   if(theEvent.getName().contains("modLevel")){
@@ -685,45 +640,42 @@ void controlEvent(ControlEvent theEvent) {
       sendOSCMessaggeKnob("/fromProcessing/" + theEvent.getName(), theEvent.value());
   };
 
-
-  //OscMessage myMessage = new OscMessage("/fromProcessing"); //Rate & Depth
-  //myMessage.add(subOscLevel);
-  //myMessage.add(cutoff);
-  ////myMessage.add(harmonicity_richness1);
-  //myMessage.add(lfoRate);
-  //myMessage.add(lfoDepth);
-  //myMessage.add(noteAttack);
-  //myMessage.add(noteDecay);
-  //myMessage.add(noteRelease);
-  //myMessage.add(noteSustain);
-  //myMessage.add(modAttack);
-  //myMessage.add(modDecay);
-  //myMessage.add(modRelease);
-  //myMessage.add(modSustain);
-
-
-  ////myMessage.add(harmonicity_richness2);
-  //myMessage.add(volume);
-  //myMessage.add(carrierModWaveform);
-  //myMessage.add(firstModWaveform);
-  //myMessage.add(secondModWaveform);
-  //myMessage.add(coarse1);
-  //myMessage.add(coarse2);
-  //myMessage.add(fine);
-  //myMessage.add(fine2);
-  //myMessage.add(modLevel1);
-  //myMessage.add(modLevel2);
+  /*
+  OscMessage myMessage = new OscMessage("/fromProcessing"); //Rate & Depth
+  myMessage.add(subOscLevel);
+  myMessage.add(cutoff);
+  //myMessage.add(harmonicity_richness1);
+  myMessage.add(lfoRate);
+  myMessage.add(lfoDepth);
+  myMessage.add(noteAttack);
+  myMessage.add(noteDecay);
+  myMessage.add(noteRelease);
+  myMessage.add(noteSustain);
+  myMessage.add(modAttack);
+  myMessage.add(modDecay);
+  myMessage.add(modRelease);
+  myMessage.add(modSustain);
 
 
-
-
-
-  
-  //osc.send(myMessage, supercollider);
-  //myMessage.print();
+  //myMessage.add(harmonicity_richness2);
+  myMessage.add(volume);
+  myMessage.add(carrierModWaveform);
+  myMessage.add(firstModWaveform);
+  myMessage.add(secondModWaveform);
+  myMessage.add(coarse1);
+  myMessage.add(coarse2);
+  myMessage.add(fine);
+  myMessage.add(fine2);
+  myMessage.add(modLevel1);
+  myMessage.add(modLevel2);
 
 
 
 
+
+
+  osc.send(myMessage, supercollider);
+  myMessage.print();
+  */
 
 }
