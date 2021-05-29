@@ -8,9 +8,9 @@ color myBlack, cobalto, black, white, transparent , opaqueTransparent, primo, ro
 
 
 void setup() {
-  
+
   size(1400, 620);
-   
+
    // Define colors
 
   cobalto = color(141, 175, 181);
@@ -25,9 +25,9 @@ void setup() {
 
 
 
- oscInit();
+  oscInit();
   guiInit();
-  midiInit();
+
 
 }
 
