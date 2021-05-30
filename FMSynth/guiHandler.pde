@@ -316,7 +316,7 @@ public void guiInit() {
      ;
    cp5.addSlider("noteSustain")
      .setCaptionLabel("S")
-     .setRange(0, 1.5)
+     .setRange(0, 2)
      .setValue(noteSustain)
      .setPosition(-70,50)
      .setSize(180,9)
@@ -417,7 +417,7 @@ public void guiInit() {
      ;
   cp5.addSlider("modSustain")
      .setCaptionLabel("S")
-     .setRange(0, 10)
+     .setRange(0, 2)
      .setValue(modSustain)
      .setPosition(-70,50)
      .setSize(180,9)
